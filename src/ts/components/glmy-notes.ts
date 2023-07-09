@@ -3,8 +3,12 @@ import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
 import GLMY from './glmy-app';
 import NightEditor from './night-editor';
 import NightIndex from './night-index';
-import NightModal from './night-modal';
+import States from '../extensions/states';
+import AbstractComponent from '../abstract/component';
 
+interface GLMYNotesStates {
+    fileListVisible: boolean
+};
 
 interface Note {
     title: string;
@@ -13,7 +17,13 @@ interface Note {
     [key: string|number]: any;
 };
 
-class GLMYNotes extends HTMLElement {
+interface NoteTab {
+    note: Note;
+    tab: HTMLLIElement;
+    editor: NightEditor|null;
+};
+
+class GLMYNotes extends AbstractComponent {
 
     /**
      * Application Root
@@ -31,19 +41,16 @@ class GLMYNotes extends HTMLElement {
     private activeTab: string|null = null;
 
     /**
-     * Available Editor Tabs
+     * Available Editor NoteTabs
      */
-    private tabs: Map<string, HTMLLIElement> = new Map;
-
-    /**
-     * Available Notes
-     */
-    private notes: Map<string, Note> = new Map;
+    private notes: Map<string, NoteTab> = new Map;
 
     /**
      * FileList visibility switch
      */
-    private fileListVisible: boolean = true;
+    public states: States<GLMYNotesStates> = new States({
+        fileListVisible: true
+    });
 
     /**
      * Create a new <glmy-notes /> instance
@@ -103,8 +110,11 @@ class GLMYNotes extends HTMLElement {
             let isActive = this.activeTab === key;
             let tab = this.buildTab(key, note.title, isActive);
 
-            this.tabs.set(key, tab);
-            this.notes.set(key, note);
+            this.notes.set(key, {
+                note,
+                tab,
+                editor: null
+            });
         }
 
         // Open File
@@ -133,6 +143,18 @@ class GLMYNotes extends HTMLElement {
     }
 
     /**
+     * Callback for changed states
+     * @param key 
+     * @param newValue 
+     * @param oldValue 
+     */
+    public async onStateChanged(key: keyof GLMYNotesStates, newValue: any, oldValue: any) {
+        if (key === 'fileListVisible') {
+            this.classList[newValue ? 'remove' : 'add']('hide-sidebar');
+        }
+    }
+
+    /**
      * Open a new Tab
      * @param string
      */
@@ -146,14 +168,29 @@ class GLMYNotes extends HTMLElement {
         let tab = this.buildTab(path, note.title, true);
         this.activeTab = path;
 
-        this.tabs.set(path, tab);
-        this.notes.set(path, note);
+        this.notes.set(path, {
+            note,
+            tab,
+            editor: null
+        });
         
         let tabs = this.querySelector('.tabs') as HTMLUListElement;
         if (tabs.lastElementChild !== null) {
             tabs.lastElementChild.before(tab);
         } else {
             tabs.append(tab);
+        }
+    }
+
+    /**
+     * Close an existing tab
+     * @param key 
+     */
+    public async closeTab(key: string) {
+        let noteTab = this.notes.get(key);
+        if (noteTab) {
+            noteTab.tab.remove();
+            noteTab.editor?.remove();
         }
     }
 
@@ -176,6 +213,20 @@ class GLMYNotes extends HTMLElement {
         if (target.matches('[name="create"]')) {
             this.index?.addPlaceholder('/', target.getAttribute('value') as 'file'|'folder');
         }
+
+        if (target.matches('[name="action"]')) {
+            if ((target as HTMLButtonElement).value === 'filelist') {
+                this.states.set('fileListVisible', !this.states.get('fileListVisible'));
+            }
+
+            let tab = target.closest('[data-tab]') as HTMLElement|null;
+            if (tab === null) {
+                return;
+            }
+            if ((target as HTMLButtonElement).value === 'close') {
+                this.closeTab(tab.dataset.tab as string);
+            }
+        }
     }
 
     /**
@@ -192,8 +243,10 @@ class GLMYNotes extends HTMLElement {
                 <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
                 <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
             </svg>
+
             <span class="item-title">${title}</span>
-            <button type="button" class="ml-3 -mr-1 toolbar-btn">
+
+            <button type="button" class="ml-3 -mr-1 toolbar-btn" name="action" value="close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                     <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
@@ -208,16 +261,16 @@ class GLMYNotes extends HTMLElement {
     public async render() {
         let tabs = this.querySelector('.tabs') as HTMLUListElement;
         if (tabs.lastElementChild !== null) {
-            tabs.lastElementChild.before(...this.tabs.values());
+            tabs.lastElementChild.before(...[...this.notes.values()].map(note => note.tab));
         } else {
-            tabs.append(...this.tabs.values())
+            tabs.append(...[...this.notes.values()].map(note => note.tab));
         }
 
         // Set note content
         if (this.activeTab && this.notes.has(this.activeTab)) {
-            let note = this.notes.get(this.activeTab) as Note;
-            (this.querySelector('[data-note-title]') as HTMLInputElement).value = note.title;
-            (this.querySelector('night-editor') as NightEditor).value = note.content;
+            let note = this.notes.get(this.activeTab) as NoteTab;
+            (this.querySelector('[data-note-title]') as HTMLInputElement).value = note.note.title;
+            (this.querySelector('night-editor') as NightEditor).value = note.note.content;
         }
     }
 

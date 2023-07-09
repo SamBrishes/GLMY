@@ -10,8 +10,10 @@
 }
 
 .screen-sidebar {
-    @apply flex flex-col w-[220px] flex-shrink-0 flex-grow-0 basis-[220px] text-sm;
+    @apply flex flex-col w-[220px] flex-shrink-0 flex-grow-0 basis-[220px] text-sm overflow-hidden;
+    @apply duration-300 ease-in-out;
     @apply bg-gray-800;
+    transition-property: width, flex-basis;
 
     header {
         @apply h-12 border-r;
@@ -22,6 +24,10 @@
         @apply border-r flex-1;
         @apply border-gray-900;
     }
+}
+
+.screen.hide-sidebar .screen-sidebar {
+    @apply w-0 basis-0;
 }
 
 .screen-content {

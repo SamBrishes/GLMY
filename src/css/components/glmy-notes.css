@@ -6,6 +6,12 @@
 glmy-notes {
     @apply text-gray-300;
 
+    &.hide-filelist {
+        night-index {
+            @apply basis-0 w-0;
+        }
+    }
+
     article {
         @apply flex-1 basis-auto;
     }

@@ -1,4 +1,6 @@
 
+import States from "../extensions/states";
+
 abstract class AbstractComponent extends HTMLElement {
 
     /**
@@ -14,6 +16,11 @@ abstract class AbstractComponent extends HTMLElement {
     }
 
     /**
+     * Component States
+     */
+    public states: States<any>|null = null;
+
+    /**
      * Abstract class for other FormHandling components
      */
     constructor() {
@@ -22,6 +29,13 @@ abstract class AbstractComponent extends HTMLElement {
         if (this.constructor.name === 'AbstractComponent') {
             throw new Error('AbstractComponent is an abstract class and cannot be used directly.');
         }
+
+        // Lazy initialization
+        setTimeout(() => {
+            if (this.states) {
+                this.states.bind(this);
+            }
+        }, 10)
     }
 
     /**
@@ -47,6 +61,16 @@ abstract class AbstractComponent extends HTMLElement {
      * Disconnected Callback
      */
     public async disconnectedCallback() {
+        
+    }
+
+    /**
+     * Callback for changed states
+     * @param key 
+     * @param newValue 
+     * @param oldValue 
+     */
+    public async onStateChanged(key: string, newValue: any, oldValue: any) {
         
     }
 
