@@ -108,7 +108,6 @@ class NightIndex extends AbstractComponent {
      */
     public async toggleContextMenu(target: HTMLElement) {
         if (target.classList.contains('active')) {
-            console.log('return')
             return;
         }
         const contextMenu = new NightContext(target, {
@@ -148,12 +147,10 @@ class NightIndex extends AbstractComponent {
         });
 
         contextMenu.on('show', () => {
-            console.log('1');
             target.classList.add('active');
         });
 
         contextMenu.on('hide', () => {
-            console.log('2');
             target.classList.remove('active');
         });
 
