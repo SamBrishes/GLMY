@@ -1,0 +1,13 @@
+
+/*-- ----------------------------------------*/
+/*  Night Index Component
+/*-- ----------------------------------------*/
+
+night-index {
+    .item-label {
+        input {
+            @apply border-0 rounded-sm outline-none shadow-none w-full;
+            @apply bg-gray-700;
+        }
+    }
+}

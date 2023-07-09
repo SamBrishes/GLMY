@@ -1,0 +1,16 @@
+
+/*-- ----------------------------------------*/
+/*  Night Tooltip Component
+/*-- ----------------------------------------*/
+
+night-tooltip {
+    @apply absolute opacity-0 mt-6 px-3 py-2 rounded text-sm font-semibold;
+    @apply duration-300 ease-in-out;
+    @apply bg-gray-900 text-gray-500;
+    z-index: 990;
+    transition-property: opacity, margin-top;
+
+    &.visible {
+        @apply opacity-100 mt-0;
+    }
+}

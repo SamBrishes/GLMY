@@ -39,9 +39,7 @@ class NightContext extends HTMLElement {
         
         document.body.addEventListener('click', async (event) => {
             if (!this.contains(event.target as HTMLElement)) {
-                this.classList.remove('active');
-                await wait(300);
-                this.remove();
+                this.hide();
             }
         });
     }
@@ -81,6 +79,15 @@ class NightContext extends HTMLElement {
             arrowElement.style.left = `${data.middlewareData.arrow.x}px`;
         }
         await wait(300);
+    }
+
+    /**
+     * Hide Context Menu
+     */
+    public async hide() {
+        this.classList.remove('active');
+        await wait(300);
+        this.remove();
     }
 
     /**

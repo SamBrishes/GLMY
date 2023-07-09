@@ -1,6 +1,4 @@
 
-import Sortable from 'sortablejs';
-
 import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
 import GLMY from './glmy-app';
 import NightEditor from './night-editor';
@@ -108,7 +106,11 @@ class GLMYNotes extends HTMLElement {
             this.notes.set(key, note);
         }
 
-        this.render();
+        this.addEventListener('click', (evt) => {
+            this.onLiveClick(evt);
+        });
+
+        await this.render();
     }
 
     /**
@@ -116,6 +118,27 @@ class GLMYNotes extends HTMLElement {
      */
     public async disconnectedCallback() {
         
+    }
+
+    /**
+     *  Live onClick handler
+     */
+    public async onLiveClick(event: Event) {
+        let target = event.target instanceof Element ? event.target : null;
+        if (!target) {
+            return;
+        }
+
+        // Skip Icons 
+        if (target.localName === 'SVG' || target.closest('SVG') !== null) {
+            target = (target.localName === 'SVG' ? target : target.closest('SVG')) as HTMLElement;
+            target = target.parentElement as HTMLElement;
+        }
+
+        // Check for action
+        if (target.matches('[name="create"]')) {
+            this.index?.addPlaceholder('/', target.getAttribute('value') as 'file'|'folder');
+        }
     }
 
     /**
@@ -146,23 +169,6 @@ class GLMYNotes extends HTMLElement {
      * Render Component
      */
     public async render() {
-        if (this.fileListVisible) {
-            let fileLists = this.querySelectorAll('.filelist') as NodeListOf<HTMLUListElement>;
-            Array.from(fileLists).map(fileList => {
-                return new Sortable(fileList, {
-                    animation: 150,
-                    draggable: '.filelist-item',
-                    group: 'filelist',
-                    handle: '.item-move',
-                    delayOnTouchOnly: true,
-                    fallbackOnBody: false,
-                    swapThreshold: 0.65,
-                    forceFallback: navigator.userAgent.indexOf("Edg") >= 0  // Need to force fallback on Edge browsers / WebView2
-                });
-            });
-        }
-
-        // List Tabs
         let tabs = this.querySelector('.tabs') as HTMLUListElement;
         if (tabs.lastElementChild !== null) {
             tabs.lastElementChild.before(...this.tabs.values());
