@@ -266,8 +266,8 @@ class GLMY extends AbstractComponent {
         temp.innerHTML = content;
 
         // Replace or Set Page
-        if (this.sidebar?.nextElementSibling) {
-            this.sidebar.nextElementSibling.replaceWith(temp.querySelector('.screen') as HTMLElement);
+        if (this.querySelector('.screen')) {
+            (this.querySelector('.screen') as HTMLElement).replaceWith(temp.querySelector('.screen') as HTMLElement);
         } else {
             this.appendChild(temp.querySelector('.screen') as HTMLElement);
         }

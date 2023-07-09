@@ -1,13 +1,14 @@
 
 import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
+
+import AbstractComponent from '../abstract/component';
+import States from '../extensions/states';
 import GLMY from './glmy-app';
 import NightEditor from './night-editor';
 import NightIndex from './night-index';
-import States from '../extensions/states';
-import AbstractComponent from '../abstract/component';
 
 interface GLMYNotesStates {
-    fileListVisible: boolean
+    showFileList: boolean
 };
 
 interface Note {
@@ -49,11 +50,11 @@ class GLMYNotes extends AbstractComponent {
      * FileList visibility switch
      */
     public states: States<GLMYNotesStates> = new States({
-        fileListVisible: true
+        showFileList: true
     });
 
     /**
-     * Create a new <glmy-notes /> instance
+     * Create a new GLMYNotes component instance
      */
     constructor() {
         super();
@@ -149,8 +150,8 @@ class GLMYNotes extends AbstractComponent {
      * @param oldValue 
      */
     public async onStateChanged(key: keyof GLMYNotesStates, newValue: any, oldValue: any) {
-        if (key === 'fileListVisible') {
-            this.classList[newValue ? 'remove' : 'add']('hide-sidebar');
+        if (key === 'showFileList') {
+            this.classList[newValue ? 'add' : 'remove']('hide-sidebar');
         }
     }
 
@@ -216,7 +217,7 @@ class GLMYNotes extends AbstractComponent {
 
         if (target.matches('[name="action"]')) {
             if ((target as HTMLButtonElement).value === 'filelist') {
-                this.states.set('fileListVisible', !this.states.get('fileListVisible'));
+                this.states.set('showFileList', !this.states.get('showFileList'));
             }
 
             let tab = target.closest('[data-tab]') as HTMLElement|null;
