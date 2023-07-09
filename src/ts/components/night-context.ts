@@ -12,11 +12,15 @@ interface ContextItem {
 }
 
 interface ContextOptions {
-    target: HTMLElement;
     items: ContextItem[];
 }
 
 class NightContext extends AbstractComponent {
+
+    /**
+     * Tooltip Target Element
+     */
+    public target: HTMLElement;
 
     /**
      * Modal Options
@@ -24,11 +28,20 @@ class NightContext extends AbstractComponent {
     public options: Required<ContextOptions>;
 
     /**
-     * Abstract class for other FormHandling components
+     * Click Outside Event Handler
      */
-    constructor(options: ContextOptions) {
+    private onClickOutsideHandler: (this: NightContext, event: Event) => void;
+
+    /**
+     * Create a new NightModal component
+     * @param target 
+     * @param options 
+     */
+    constructor(target: HTMLElement, options: ContextOptions) {
         super();
+        this.target = target;
         this.options = options;
+        this.onClickOutsideHandler = this.onClickOutside.bind(this);
     }
 
     /**
@@ -39,18 +52,25 @@ class NightContext extends AbstractComponent {
 
         await wait(150);
         
-        document.body.addEventListener('click', async (event) => {
-            if (!this.contains(event.target as HTMLElement)) {
-                this.hide();
-            }
-        });
+        document.body.addEventListener('click', this.onClickOutsideHandler);
     }
 
     /**
      * Disconnected Callback
      */
     public async disconnectedCallback() {
-        
+        document.body.removeEventListener('click', this.onClickOutsideHandler);
+    }
+
+    /**
+     * Click Outside Event Handler
+     * @param event
+     */
+    public async onClickOutside(event: Event) {
+        if (event.target === this || this.contains(event.target as HTMLElement)) {
+            return;
+        }
+        await this.hide();
     }
 
     /**
@@ -63,7 +83,7 @@ class NightContext extends AbstractComponent {
         this.dispatch('show', this);
         
         const arrowElement = this.querySelector('.context-menu-arrow') as HTMLElement;
-        const data = await computePosition(this.options.target, this, {
+        const data = await computePosition(this.target, this, {
             middleware: [
                 arrow({
                     element: arrowElement
@@ -94,9 +114,9 @@ class NightContext extends AbstractComponent {
 
         this.classList.remove('active');
         await wait(300);
-        this.remove();
 
         this.dispatch('hidden', this);
+        this.remove();
     }
 
     /**

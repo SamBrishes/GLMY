@@ -1,5 +1,5 @@
 
-import { BaseDirectory, FileEntry, createDir, readDir, writeTextFile } from "@tauri-apps/api/fs";
+import { BaseDirectory, FileEntry, createDir, readDir, renameFile, writeTextFile } from "@tauri-apps/api/fs";
 import Sortable from "sortablejs";
 import NightContext from "./night-context";
 import isValidFilename from "../support/valid-filename";
@@ -86,7 +86,7 @@ class NightIndex extends AbstractComponent {
         // Check for action
         if (target.matches('[name="action"]')) {
             if (target.getAttribute('value') === 'context') {
-                return this.openContextMenu(target as HTMLElement);
+                return this.toggleContextMenu(target as HTMLElement);
             }
         }
 
@@ -103,20 +103,24 @@ class NightIndex extends AbstractComponent {
     }
 
     /**
-     * Open Context Menu
+     * Toggle Context Menu
+     * @param target
      */
-    public async openContextMenu(target: HTMLElement) {
-        const contextMenu = new NightContext({
-            target,
+    public async toggleContextMenu(target: HTMLElement) {
+        if (target.classList.contains('active')) {
+            console.log('return')
+            return;
+        }
+        const contextMenu = new NightContext(target, {
             items: [
                 {
                     label: 'Open',
-                    action: (item: HTMLElement) => {
+                    action: () => {
                         let entryItem = target.closest('[data-path]') as HTMLElement|null;
                         if (!entryItem) {
                             return;
                         }
-
+    
                         this.dispatch(`open:${entryItem.dataset.type}`, {
                             path: entryItem.dataset.path
                         });
@@ -125,7 +129,9 @@ class NightIndex extends AbstractComponent {
                 },
                 {
                     label: 'Rename',
-                    action: null
+                    action: () => {
+    
+                    }
                 },
                 {
                     label: 'Delete',
@@ -140,6 +146,17 @@ class NightIndex extends AbstractComponent {
                 }
             ]
         });
+
+        contextMenu.on('show', () => {
+            console.log('1');
+            target.classList.add('active');
+        });
+
+        contextMenu.on('hide', () => {
+            console.log('2');
+            target.classList.remove('active');
+        });
+
         contextMenu.show();
     }
 
