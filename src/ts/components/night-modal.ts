@@ -1,3 +1,4 @@
+import AbstractComponent from "../abstract/component";
 import wait from "../support/wait";
 
 interface ModalOptions {
@@ -18,7 +19,7 @@ interface ConfirmOptions {
     cancelColor: string;
 };
 
-class NightModal extends HTMLElement {
+class NightModal extends AbstractComponent {
 
     /**
      * Default Options
@@ -121,38 +122,6 @@ class NightModal extends HTMLElement {
      */
     public async disconnectedCallback() {
         this.dispatch('disconnected');
-    }
-
-    /**
-     * Add Event listener
-     * @param event 
-     * @param callback 
-     */
-    public on(event: string, callback: EventListener) {
-        this.addEventListener(event, callback);
-    }
-
-    /**
-     * Remove Event listener
-     * @param event 
-     * @param callback 
-     */
-    public off(event: string, callback: EventListener) {
-        this.removeEventListener(event, callback);
-    }
-
-    /**
-     * Dispatch Event
-     * @param event 
-     */
-    public dispatch(event: string) {
-        let evt = new CustomEvent(event, {
-            bubbles: false,
-            cancelable: false,
-            composed: false,
-            detail: this
-        });
-        this.dispatchEvent(evt);
     }
 
     /**

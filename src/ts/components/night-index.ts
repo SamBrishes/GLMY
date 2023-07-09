@@ -4,13 +4,14 @@ import Sortable from "sortablejs";
 import NightContext from "./night-context";
 import isValidFilename from "../support/valid-filename";
 import NightTooltip from "./night-tooltip";
+import AbstractComponent from "../abstract/component";
 
 type NewFileEntry = FileEntry & {
     type: 'file' | 'folder',
     subPath: string;
 };
 
-class NightIndex extends HTMLElement {
+class NightIndex extends AbstractComponent {
 
     /**
      * FileList Map
@@ -85,8 +86,19 @@ class NightIndex extends HTMLElement {
         // Check for action
         if (target.matches('[name="action"]')) {
             if (target.getAttribute('value') === 'context') {
-                this.openContextMenu(target as HTMLElement);
+                return this.openContextMenu(target as HTMLElement);
             }
+        }
+
+        // Check for Item
+        let item = target.matches('[data-path][data-type]') ? target : null;
+        if (!item && target.closest('[data-path][data-type]')) {
+            item = target.closest('[data-path][data-type]');
+        }
+        if (item && item instanceof HTMLElement) {
+            this.dispatch(`open:${item.dataset.type}`, {
+                path: item.dataset.path
+            });
         }
     }
 
@@ -99,7 +111,17 @@ class NightIndex extends HTMLElement {
             items: [
                 {
                     label: 'Open',
-                    action: null
+                    action: (item: HTMLElement) => {
+                        let entryItem = target.closest('[data-path]') as HTMLElement|null;
+                        if (!entryItem) {
+                            return;
+                        }
+
+                        this.dispatch(`open:${entryItem.dataset.type}`, {
+                            path: entryItem.dataset.path
+                        });
+                        contextMenu.hide();
+                    }
                 },
                 {
                     label: 'Rename',

@@ -6,10 +6,11 @@ import './components/glmy-app';
 import './components/glmy-notes';
 import './components/glmy-sidebar';
 
-import './components/night-index';
-
-import './components/night-form-control';
+import './components/night-context';
 import './components/night-editor';
+import './components/night-index';
+import './components/night-modal';
+import './components/night-tooltip';
 
 
 window.addEventListener("DOMContentLoaded", () => {

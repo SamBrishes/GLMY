@@ -17,10 +17,10 @@ import { upload as PluginUpload } from '@milkdown/plugin-upload';
 import { nord as ThemeNord } from '@milkdown/theme-nord';
 import SimpleBar from 'simplebar';
 
-import NightFormControl from "./night-form-control";
+import AbstractFormControl from '../abstract/form-control';
 
 
-class NightEditor extends NightFormControl {
+class NightEditor extends AbstractFormControl {
 
     /**
      * Editor

@@ -1,10 +1,19 @@
 
-class NightFormControl extends HTMLElement {
+import AbstractComponent from "./component";
+
+abstract class AbstractFormControl extends AbstractComponent {
 
     /**
-     * Enable Form Association
+     * Form Association
      */
     static formAssociated = true;
+
+    /**
+     * Observed Attributes
+     */
+    static get observedAttributes() {
+        return [];
+    }
 
     /**
      * Internal Element attributes
@@ -23,8 +32,8 @@ class NightFormControl extends HTMLElement {
         super();
         this._internals = this.attachInternals();
 
-        if (this.constructor.name === 'NightFormControl' || this.localName === 'night-form-control') {
-            throw new Error('NightFormControl is an abstract class and cannot be instantiated directly.');
+        if (this.constructor.name === 'AbstractFormControl') {
+            throw new Error('AbstractFormControl is an abstract class and cannot be used directly.');
         }
     }
 
@@ -130,4 +139,4 @@ class NightFormControl extends HTMLElement {
 }
 
 // Export Module
-export default NightFormControl;
+export default AbstractFormControl;

@@ -1,13 +1,14 @@
 
 import { arrow, computePosition, offset } from "@floating-ui/dom";
 import wait from "../support/wait";
+import AbstractComponent from "../abstract/component";
 
 interface TooltipOptions {
     text: string;
     duration?: number;
 }
 
-class NightTooltip extends HTMLElement {
+class NightTooltip extends AbstractComponent {
 
     /**
      * Default Options
@@ -90,7 +91,7 @@ class NightTooltip extends HTMLElement {
     /**
      * Render Component
      */
-    public render() {
+    public async render() {
         this.innerText = `${this.options.text}`;
     }
 

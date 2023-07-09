@@ -91,9 +91,10 @@ class GLMYNotes extends HTMLElement {
         this.root = this.closest('glmy-app') as GLMY;
         this.index = this.querySelector('night-index') as NightIndex;
 
+        // Handle active Tab
         this.activeTab = this.root.config.session.notes.activeTab;
         for await (const key of this.root.config.session.notes.openTabs) {
-            const file = key.startsWith('./') ? key.slice(2) : key.trimLeft('/');
+            const file = key.startsWith('./') ? key.slice(2) : key.trimLeft();
             const text = await readTextFile(`GLMY/notes/${file}`, {
                 dir: BaseDirectory.Document
             });
@@ -106,10 +107,21 @@ class GLMYNotes extends HTMLElement {
             this.notes.set(key, note);
         }
 
+        // Open File
+        this.index.addEventListener('open:file', (evt: CustomEventInit) => {
+            const path = evt.detail.path;
+            if (!path) {
+                return;
+            }
+            this.openTab(path);
+        });
+
+        // Add Live Click Listener
         this.addEventListener('click', (evt) => {
             this.onLiveClick(evt);
         });
 
+        // Render
         await this.render();
     }
 
@@ -118,6 +130,31 @@ class GLMYNotes extends HTMLElement {
      */
     public async disconnectedCallback() {
         
+    }
+
+    /**
+     * Open a new Tab
+     * @param string
+     */
+    public async openTab(path: string) {
+        const file = path.startsWith('./') ? path.slice(2) : path;
+        const text = await readTextFile(`GLMY/notes/${file}`, {
+            dir: BaseDirectory.Document
+        });
+        const note = this.parseTextToNote(file, text);
+
+        let tab = this.buildTab(path, note.title, true);
+        this.activeTab = path;
+
+        this.tabs.set(path, tab);
+        this.notes.set(path, note);
+        
+        let tabs = this.querySelector('.tabs') as HTMLUListElement;
+        if (tabs.lastElementChild !== null) {
+            tabs.lastElementChild.before(tab);
+        } else {
+            tabs.append(tab);
+        }
     }
 
     /**

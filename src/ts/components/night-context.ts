@@ -1,12 +1,14 @@
 
 import { arrow, computePosition, offset } from "@floating-ui/dom";
+
+import AbstractComponent from "../abstract/component";
 import wait from "../support/wait";
 
 interface ContextItem {
     label: string;
     icon?: string | HTMLElement | SVGElement;
     danger?: boolean;
-    action: (() => void) | null;
+    action: ((element: HTMLElement) => void) | null;
 }
 
 interface ContextOptions {
@@ -14,7 +16,7 @@ interface ContextOptions {
     items: ContextItem[];
 }
 
-class NightContext extends HTMLElement {
+class NightContext extends AbstractComponent {
 
     /**
      * Modal Options
@@ -58,6 +60,7 @@ class NightContext extends HTMLElement {
         if (!document.body.contains(this)) {
             document.body.append(this);
         }
+        this.dispatch('show', this);
         
         const arrowElement = this.querySelector('.context-menu-arrow') as HTMLElement;
         const data = await computePosition(this.options.target, this, {
@@ -79,27 +82,38 @@ class NightContext extends HTMLElement {
             arrowElement.style.left = `${data.middlewareData.arrow.x}px`;
         }
         await wait(300);
+
+        this.dispatch('shown', this);
     }
 
     /**
      * Hide Context Menu
      */
     public async hide() {
+        this.dispatch('hide', this);
+
         this.classList.remove('active');
         await wait(300);
         this.remove();
+
+        this.dispatch('hidden', this);
     }
 
     /**
      * Render Component
      */
-    public render() {
+    public async render() {
         let list = document.createElement('ul');
         list.className = 'context-menu';
 
         for (const item of this.options.items) {
             let li = document.createElement('li');
             li.className = `menu-item${item.danger ? ' item-danger' : ''}`;
+            li.addEventListener('click', () => {
+                if (item.action !== null) {
+                    item.action(li);
+                }
+            });
             list.append(li);
 
             if (typeof item.icon !== 'undefined' && item.icon !== null) {
