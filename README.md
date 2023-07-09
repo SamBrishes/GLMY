@@ -9,7 +9,7 @@ Features
 --------
 The following features are planned
 
-> Write and Manage Notes (similar to Typora or Obsidian)
-> Create and Manage Todos and Checklists
-> Store and Tag Bookmarks
-> Create and Play with databases (CSV, JSON, SQLite) incl. conversions
+- Write and Manage Notes (similar to Typora or Obsidian)
+- Create and Manage Todos and Checklists
+- Store and Tag Bookmarks
+- Create and Play with databases (CSV, JSON, SQLite) incl. conversions
