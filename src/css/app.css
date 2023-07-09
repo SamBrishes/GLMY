@@ -1,0 +1,46 @@
+
+/*-- ----------------------------------------*/
+/*  Base Modules
+/*-- ----------------------------------------*/
+
+@import 'tailwindcss/base';
+@import './base/root';
+
+
+/*-- ----------------------------------------*/
+/*  Component Modules
+/*-- ----------------------------------------*/
+
+@import 'tailwindcss/components';
+@import './components/button';
+@import './components/filelist';
+@import './components/screen';
+@import './components/tabs';
+@import './components/titlebar';
+
+
+/*-- ----------------------------------------*/
+/*  GLMY Component Modules
+/*-- ----------------------------------------*/
+
+@import './components/glmy-app';
+@import './components/glmy-notes';
+@import './components/glmy-sidebar';
+
+@import './components/night-context';
+@import './components/night-modal';
+
+
+/*-- ----------------------------------------*/
+/*  Vendor Modules
+/*-- ----------------------------------------*/
+
+@import './vendors/milkdown';
+@import './vendors/simplebar';
+
+
+/*-- ----------------------------------------*/
+/*  Utility Modules
+/*-- ----------------------------------------*/
+
+@import 'tailwindcss/utilities';

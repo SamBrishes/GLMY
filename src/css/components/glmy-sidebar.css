@@ -1,0 +1,32 @@
+
+/*-- ----------------------------------------*/
+/*  Sidebar Component
+/*-- ----------------------------------------*/
+
+glmy-sidebar {
+    @apply flex flex-col w-14 basis-14 shrink-0 grow-0 h-full relative;
+    @apply bg-gray-900;
+    z-index: 20;
+}
+
+.sidebar-item {
+    @apply flex items-center justify-center h-12 -mr-px border-l-2;
+    @apply text-gray-400 border-l-transparent;
+    @apply transition-colors duration-300 ease-in-out;
+
+    &:not(.active):hover {
+        @apply border-l-sky-600/50 bg-gray-800/50 text-gray-300;
+    }
+    
+    &.active {
+        @apply border-l-sky-600 bg-gray-800 text-sky-100;
+    }
+
+    &.item-special:not(.active):hover {
+        @apply border-l-pink-600/50 bg-gray-800/50 text-gray-300;
+    }
+
+    &.item-special.active {
+        @apply border-l-pink-600 bg-gray-800 text-pink-100;
+    }
+}

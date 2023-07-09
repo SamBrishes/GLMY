@@ -1,0 +1,11 @@
+
+/*-- ----------------------------------------*/
+/*  GLMY Application Component
+/*-- ----------------------------------------*/
+
+glmy-app {
+    width: 100vw;
+    height: calc(100vh - 32px);
+    display: flex;
+    overflow: hidden;
+}

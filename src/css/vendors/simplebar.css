@@ -1,0 +1,6 @@
+
+@import 'simplebar/dist/simplebar.css';
+
+.simplebar-track.simplebar-vertical {
+    @apply right-6;
+}

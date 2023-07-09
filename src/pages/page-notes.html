@@ -1,0 +1,78 @@
+<glmy-notes class="screen">
+    <aside class="screen-sidebar">
+        <header>
+            <div class="flex items-center justify-start h-full gap-2 px-3">
+                <button type="button" class="toolbar-btn" title="Create a new folder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-plus" viewBox="0 0 16 16">
+                        <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14H9v-1H2.826a1 1 0 0 1-.995-.91l-.637-7A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09L14.54 8h1.005l.256-2.819A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2Zm5.672-1a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672Z"/>
+                        <path d="M13.5 9a.5.5 0 0 1 .5.5V11h1.5a.5.5 0 1 1 0 1H14v1.5a.5.5 0 1 1-1 0V12h-1.5a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 .5-.5Z"/>
+                    </svg>
+                </button>
+                <button type="button" class="toolbar-btn" title="Create a new Note">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <article class="px-4 py-3">
+            <night-index path="notes"></night-index>
+        </article>
+    </aside>
+    
+    <main class="screen-content">
+        <header>
+            <ul class="tabs">
+                <li class="tab-actions">
+                    <button type="button" class="toolbar-btn btn-outline" title="Open Note List">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter-left" viewBox="0 0 16 16">
+                            <path d="M2 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                    </button>
+                    
+                    <button type="button" class="toolbar-btn" title="Swipe left">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16">
+                            <path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/>
+                        </svg>
+                    </button>
+                </li>
+                
+                <li class="tab-actions">
+                    <button type="button" class="toolbar-btn" title="Swipe right">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+                            <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+                        </svg>
+                    </button>
+    
+                    <button type="button" class="toolbar-btn" title="Create a new Note">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+        </header>
+    
+        <article>
+            <form method="post" action="note">
+                <div class="note-title">
+                    <input type="text" placeholder="Note Title" data-note-title />
+                </div>
+                <night-editor></night-editor>
+            </form>
+        </article>
+
+        <footer>
+            <div class="stats">
+                <div class="stats-lines">Lines: <span data-line-counter>0</span></div>
+                <div class="stats-words">Words: <span data-word-counter>0</span></div>
+                <div class="stats-characters">Characters: <span data-character-counter>0</span></div>
+            </div>
+
+            <div class="stats">
+                <div class="stats-autosave">Last saved <span data-autosave-time>20 seconds ago</span></div>
+            </div>
+        </footer>
+    </main>
+</glmy-notes>

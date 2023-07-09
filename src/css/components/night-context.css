@@ -1,0 +1,57 @@
+
+/*-- ----------------------------------------*/
+/*  Night Modal Component
+/*-- ----------------------------------------*/
+
+night-context {
+    @apply absolute opacity-0 mt-6;
+    @apply duration-300 ease-in-out;
+    z-index: 990;
+    transition-property: opacity, margin-top;
+
+    &.active {
+        @apply opacity-100 mt-0;
+    }
+}
+
+.context-menu-arrow {
+    @apply absolute; 
+    @apply border-t-transparent border-x-transparent border-b-gray-900;
+    top: -10px;
+    border-style: solid;
+    border-width: 0 10px 10px 10px;
+}
+
+.context-menu {
+    @apply shadow rounded p-2 text-sm min-w-[160px];
+    @apply bg-gray-900 text-gray-500;
+
+    .menu-item {
+        @apply rounded px-3 py-1 cursor-pointer flex items-center;
+        @apply transition-colors duration-300 ease-in-out;
+
+        &:hover {
+            @apply bg-gray-800/50 text-gray-300;
+        }
+
+        &.item-danger {
+            @apply text-red-600;
+
+            &:hover {
+                @apply bg-red-800/25 text-red-500;
+            }
+        }
+
+        .item-label {
+            padding-left: 20px;
+        }
+
+        .item-icon {
+            @apply -ml-1;
+        }
+        
+        .item-icon + .item-label {
+            @apply ml-2 pl-0;
+        }
+    }
+}

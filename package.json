@@ -1,0 +1,41 @@
+{
+    "name": "@rat.md/glmy",
+    "type": "module",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "tauri": "tauri"
+    },
+    "dependencies": {
+        "@floating-ui/dom": "^1.4.4",
+        "@milkdown/core": "^7.2.4",
+        "@milkdown/plugin-clipboard": "^7.2.4",
+        "@milkdown/plugin-emoji": "^7.2.4",
+        "@milkdown/plugin-history": "^7.2.4",
+        "@milkdown/plugin-indent": "^7.2.4",
+        "@milkdown/plugin-listener": "^7.2.4",
+        "@milkdown/plugin-prism": "^7.2.4",
+        "@milkdown/plugin-slash": "^7.2.4",
+        "@milkdown/plugin-upload": "^7.2.4",
+        "@milkdown/preset-commonmark": "^7.2.4",
+        "@milkdown/preset-gfm": "^7.2.4",
+        "@milkdown/theme-nord": "^7.2.4",
+        "@tauri-apps/api": "^1.4.0",
+        "simplebar": "^6.2.5",
+        "sortablejs": "^1.15.0"
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.9",
+        "@tauri-apps/cli": "^1.4.0",
+        "@types/sortablejs": "^1.15.1",
+        "autoprefixer": "^10.4.14",
+        "postcss": "^8.4.24",
+        "postcss-import": "^15.1.0",
+        "tailwindcss": "^3.3.2",
+        "typescript": "^4.8.2",
+        "vite": "^4.2.1"
+    }
+}

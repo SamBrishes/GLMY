@@ -1,0 +1,101 @@
+
+/*-- ----------------------------------------*/
+/*  Button Component
+/*-- ----------------------------------------*/
+
+.btn {
+    @apply px-4 py-1.5 border font-semibold inline-flex items-center rounded;
+    @apply transition-colors ease-in-out duration-300;
+
+    svg:first-child {
+        @apply mr-3;
+    }
+
+    span + svg {
+        @apply ml-3;
+    }
+}
+
+
+/*-- ----------------------------------------*/
+/*  Button Component / Colors
+/*-- ----------------------------------------*/
+
+.btn-primary {
+    @apply bg-pink-700 border-pink-700 text-pink-100;
+    
+    &:not([disabled]):hover {
+        @apply bg-pink-800 border-pink-800 text-pink-100;
+    }
+
+    &:not([disabled]):active {
+        @apply bg-pink-900 border-pink-900 text-pink-100;
+    }
+}
+
+.btn-gray {
+    &:not(.outlined) {
+        @apply bg-gray-700 border-gray-700 text-gray-100;
+    }
+
+    &.outlined {
+        @apply bg-transparent border-gray-700 text-gray-300;
+    }
+
+    &:not([disabled]):hover {
+        @apply bg-gray-600 border-gray-600 text-gray-100;
+    }
+
+    &:not([disabled]):active {
+        @apply bg-gray-900 border-gray-900 text-gray-100;
+    }
+}
+
+.btn-success {
+    @apply bg-lime-700 border-lime-700 text-lime-100;
+    
+    &:not([disabled]):hover {
+        @apply bg-lime-800 border-lime-800 text-lime-100;
+    }
+
+    &:not([disabled]):active {
+        @apply bg-lime-900 border-lime-900 text-lime-100;
+    }
+}
+
+.btn-danger {
+    &:not(.outlined) {
+        @apply bg-red-700 border-red-700 text-red-100;
+    }
+
+    &.outlined {
+        @apply bg-transparent border-gray-700 text-gray-300;
+    }
+    
+    &:not([disabled]):hover {
+        @apply bg-red-800 border-red-800 text-red-100;
+    }
+
+    &:not([disabled]):active {
+        @apply bg-red-900 border-red-900 text-red-100;
+    }
+}
+
+
+/*-- ----------------------------------------*/
+/*  Toolbar Button Component
+/*-- ----------------------------------------*/
+
+.toolbar-btn {
+    @apply w-6 h-6 flex justify-center items-center rounded;
+    @apply text-gray-400;
+    @apply transition-colors duration-300 ease-in-out;
+
+    &.btn-outline {
+        box-shadow: 0 0 0 1px rgb(55 65 81);
+    }
+
+    &:hover {
+        @apply bg-gray-700 text-gray-300;
+    }
+}

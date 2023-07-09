@@ -1,0 +1,104 @@
+
+@import '@milkdown/theme-nord/style.css';
+
+.milkdown {
+    @apply w-full max-w-3xl mx-auto h-full;
+
+    .ProseMirror {
+        @apply outline-none mb-20;
+    }
+}
+
+.milkdown-theme-nord h1,
+.milkdown-theme-nord h2,
+.milkdown-theme-nord h3,
+.milkdown-theme-nord h4,
+.milkdown-theme-nord h5,
+.milkdown-theme-nord h6 {
+    @apply mt-8 mb-3 relative;
+
+    &::before {
+        @apply absolute;
+        @apply text-gray-600;
+        right: calc(100% + 1rem);
+    }
+}
+
+.milkdown-theme-nord h1 {
+    @apply text-4xl;
+
+    &::before {
+        content: '#';
+    }
+}
+
+.milkdown-theme-nord h2 {
+    @apply text-3xl;
+
+    &::before {
+        content: '##';
+    }
+}
+
+.milkdown-theme-nord h3 {
+    @apply text-2xl;
+
+    &::before {
+        content: '###';
+    }
+}
+
+.milkdown-theme-nord h4 {
+    @apply text-xl;
+
+    &::before {
+        content: '####';
+    }
+}
+
+.milkdown-theme-nord h5 {
+    @apply text-lg;
+
+    &::before {
+        content: '#####';
+    }
+}
+
+.milkdown-theme-nord h6 {
+    @apply font-semibold;
+
+    &::before {
+        content: '######';
+    }
+}
+
+.milkdown-theme-nord p {
+    @apply my-3;
+}
+
+.milkdown-theme-nord blockquote {
+    @apply border-l-4 pl-6 py-3 my-6;
+    @apply bg-gray-900 text-gray-400 border-l-sky-800;
+
+    p {
+        @apply mb-3;
+    }
+}
+
+.milkdown-theme-nord > *:first-child {
+    @apply mt-0;
+}
+
+.milkdown-theme-nord code {
+    @apply font-mono font-normal text-sky-300 bg-sky-900/25;
+}
+
+.ProseMirror {
+    @apply px-10 py-1;
+
+    &[data-placeholder]::before {
+        @apply absolute pointer-events-none;
+        @apply text-gray-600;
+        content: attr(data-placeholder);
+    }
+}

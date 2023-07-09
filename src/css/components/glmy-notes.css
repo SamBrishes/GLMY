@@ -1,0 +1,47 @@
+
+/*-- ----------------------------------------*/
+/*  GLMY notes Component
+/*-- ----------------------------------------*/
+
+glmy-notes {
+    @apply text-gray-300;
+
+    article {
+        @apply flex-1 basis-auto;
+    }
+
+    footer {
+        @apply h-6 flex flex-row items-center px-4 border-t text-xs;
+        @apply text-gray-500 border-t-gray-900 bg-gray-900/50;
+    }
+
+    .stats {
+        @apply flex flex-row gap-3;
+
+        &:last-child {
+            @apply ml-auto;
+        }
+    }
+
+    form {
+        @apply w-full h-full mx-auto;
+        max-width: 600px;
+    }
+
+    night-editor {
+        @apply h-full overflow-x-auto cursor-text;
+    }
+
+    .note-title {
+        @apply w-full;
+
+        input {
+            @apply w-full h-full text-xl px-10 py-8 border-0 outline-none;
+            @apply text-gray-300 bg-transparent;
+
+            &::placeholder {
+                @apply text-gray-600;
+            }
+        }
+    }
+}

@@ -1,0 +1,76 @@
+{
+    "build": {
+        "beforeDevCommand": "npm run dev",
+        "beforeBuildCommand": "npm run build",
+        "devPath": "http://localhost:1420",
+        "distDir": "../dist",
+        "withGlobalTauri": true
+    },
+    "package": {
+        "productName": "GLMY",
+        "version": "0.1.0"
+    },
+    "tauri": {
+        "allowlist": {
+            "fs": {
+                "all": true,
+                "scope": [
+                    "$APP/*", 
+                    "$APPDATA/*",
+                    "$DESKTOP/*",
+                    "$DOCUMENT/*",
+                    "$DOCUMENT/**/*",
+                    "$HOME/*"
+                ]
+            },
+            "path": {
+                "all": true
+            },
+            "shell": {
+                "all": false,
+                "open": true
+            },
+            "window": {
+                "all": false,
+                "close": true,
+                "hide": true,
+                "show": true,
+                "maximize": true,
+                "minimize": true,
+                "unmaximize": true,
+                "unminimize": true,
+                "startDragging": true
+            }
+        },
+        "bundle": {
+            "active": true,
+            "targets": "all",
+            "identifier": "com.tauri.dev",
+            "icon": [
+                "icons/32x32.png",
+                "icons/128x128.png",
+                "icons/128x128@2x.png",
+                "icons/icon.icns",
+                "icons/icon.ico"
+            ]
+        },
+        "security": {
+            "csp": null
+        },
+        "windows": [
+            {
+                "title": "GLMY",
+                "decorations": false,
+                "fullscreen": false,
+                "resizable": true,
+                "maximizable": true,
+                "minimizable": true,
+                "closable": true,
+                "width": 1200,
+                "minWidth": 800,
+                "height": 800,
+                "minHeight": 600
+            }
+        ]
+    }
+}

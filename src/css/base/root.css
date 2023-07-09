@@ -1,0 +1,14 @@
+
+/*-- ----------------------------------------*/
+/*  Root Stylings
+/*-- ----------------------------------------*/
+
+:root {
+    @apply w-full h-full;
+    @apply bg-gray-800;
+}
+
+html, 
+body {
+    @apply w-full h-full overflow-hidden;
+}

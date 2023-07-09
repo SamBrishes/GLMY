@@ -1,0 +1,91 @@
+
+/*-- ----------------------------------------*/
+/*  Tabs Component
+/*-- ----------------------------------------*/
+
+.tabs {
+    @apply flex w-full pt-1.5;
+    @apply bg-gray-900;
+}
+
+.tab-item {
+    @apply text-sm px-3 py-2 flex items-center border-b-2 relative;
+    @apply border-transparent;
+    @apply transition-colors duration-300 ease-in-out;
+
+    &::before {
+        @apply top-1 left-1 right-1 bottom-1 absolute rounded pointer-events-none;
+        @apply transition-colors duration-300 ease-in-out;
+        content: "";
+        z-index: 20;
+    }
+    &:not(.active) {
+        @apply cursor-pointer;
+    }
+    &:not(.active):hover:not(:has(.toolbar-btn:hover))::before {
+        @apply bg-gray-800/50;
+    }
+
+    > * {
+        @apply relative;
+        z-index: 30;
+    }
+
+    > svg:first-child {
+        @apply mr-3;
+        @apply text-gray-700;
+    }
+    
+    .item-title {
+        @apply max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap text-sm;
+        @apply text-gray-500;
+        @apply transition-colors duration-300 ease-in-out;
+    }
+}
+
+.tab-item.active {
+    @apply border-sky-600;
+
+    > svg:first-child {
+        @apply text-gray-500;
+    }
+
+    .item-title {
+        @apply text-gray-300;
+    }
+
+    .toolbar-btn {
+        @apply text-gray-500;
+
+        &:hover {
+            @apply bg-gray-800 text-gray-300;
+        }
+    }
+}
+
+.tab-actions {
+    @apply self-center py-2 border-b-2 relative flex flex-row gap-2;
+    @apply border-transparent;
+
+    &::before {
+        @apply top-3 bottom-3 w-px absolute;
+        @apply bg-gray-700;
+        content: "";
+    }
+    
+    &:first-child {
+        @apply px-2 mr-2;
+    }
+
+    &:first-child::before {
+        @apply right-0;
+    }
+
+    &:last-child {
+        @apply ml-auto px-4;
+    }
+
+    &:last-child::before {
+        @apply left-0;
+    }
+}

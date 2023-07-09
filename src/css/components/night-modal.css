@@ -1,0 +1,52 @@
+
+/*-- ----------------------------------------*/
+/*  Night Modal Component
+/*-- ----------------------------------------*/
+
+night-modal {
+    @apply top-[32px] left-0 right-0 bottom-0 fixed;
+    @apply bg-transparent;
+    @apply transition-colors duration-300 ease-in-out;
+    z-index: 998;
+
+    &[visible].backdrop {
+        @apply bg-gray-900/75;
+    }
+
+    .dialog {
+        @apply rounded absolute border top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg opacity-0 mt-8;
+        @apply bg-gray-900 border-gray-800;
+        @apply duration-300 ease-in-out;
+
+        width: 500px;
+        height: auto; 
+        z-index: 999;
+        transition-property: opacity, margin-top;
+    }
+
+    &[visible] .dialog {
+        @apply opacity-100 mt-0;
+    }
+
+    .dialog-header {
+        @apply px-5 py-3;
+        @apply text-gray-400;
+     
+        .dialog-title {
+            @apply font-semibold;
+        }
+    }
+
+    .dialog-body {
+        @apply px-5 py-3;
+        @apply text-gray-200;
+    }
+    
+    .dialog-header + .dialog-body {
+        @apply pt-0;
+    }
+
+    .dialog-footer {
+        @apply px-5 py-3 flex justify-end gap-3;
+    }
+}
