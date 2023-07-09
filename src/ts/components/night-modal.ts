@@ -83,7 +83,8 @@ class NightModal extends AbstractComponent {
     public options: Required<ModalOptions>;
 
     /**
-     * Create a new <night-modal /> component
+     * Create a new NightModal component instance
+     * @param options
      */
     constructor(options: ModalOptions) {
         super();

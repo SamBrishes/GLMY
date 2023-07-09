@@ -53,7 +53,7 @@ class NightEditor extends AbstractFormControl {
     private characters: number = 0;
 
     /**
-     * Create a new <night-editor /> instance
+     * Create a new NightEditor component instance
      */
     constructor() {
         super();

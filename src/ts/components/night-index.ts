@@ -24,7 +24,7 @@ class NightIndex extends AbstractComponent {
     private sortables: Map<HTMLUListElement, Sortable>;
 
     /**
-     * Create a new <night-filelist /> instance
+     * Create a new NightIndex component instance
      */
     constructor() {
         super();

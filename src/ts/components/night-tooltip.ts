@@ -29,7 +29,7 @@ class NightTooltip extends AbstractComponent {
     public options: Required<TooltipOptions>;
 
     /**
-     * Create a new NightTooltip component
+     * Create a new NightTooltip component instance
      * @param target
      * @param options
      */

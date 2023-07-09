@@ -18,12 +18,12 @@ interface ContextOptions {
 class NightContext extends AbstractComponent {
 
     /**
-     * Tooltip Target Element
+     * Context Target Element
      */
     public target: HTMLElement;
 
     /**
-     * Modal Options
+     * Context Options
      */
     public options: Required<ContextOptions>;
 
@@ -33,7 +33,7 @@ class NightContext extends AbstractComponent {
     private onClickOutsideHandler: (this: NightContext, event: Event) => void;
 
     /**
-     * Create a new NightModal component
+     * Create a new NightContext component instance
      * @param target 
      * @param options 
      */
@@ -63,7 +63,7 @@ class NightContext extends AbstractComponent {
     }
 
     /**
-     * Click Outside Event Handler
+     * Click Outside EventListener
      * @param event
      */
     public async onClickOutside(event: Event) {
