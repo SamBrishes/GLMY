@@ -13,3 +13,18 @@ The following features are planned
 - Create and Manage Todos and Checklists
 - Store and Tag Bookmarks
 - Create and Play with databases (CSV, JSON, SQLite) incl. conversions
+
+
+Awesome Dependencies
+--------------------
+
+- [TAURI](https://tauri.app/)
+- [@milkdown](https://milkdown.dev/), based on [ProseMirror](https://prosemirror.net/)
+- any many more... (see package.json)
+
+
+Copyright & License
+-------------------
+Written by SamBrishes <sam@rat.md> - rat.md.
+
+Published under the MIT license
