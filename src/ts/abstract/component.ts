@@ -31,6 +31,7 @@ abstract class AbstractComponent extends HTMLElement {
         }
 
         // Lazy initialization
+        // ...initially-assigned properties aren't available in the constructor
         setTimeout(() => {
             if (this.states) {
                 this.states.bind(this);

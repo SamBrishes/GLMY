@@ -4,6 +4,7 @@ import { readDir, BaseDirectory, exists, createDir, writeFile, readTextFile, wri
 import Storage from '../plugins/storage';
 import GLMYSidebar from './glmy-sidebar';
 import GLMYError from '../plugins/glmy-error';
+import AbstractComponent from '../abstract/component';
 
 
 type RustErrorResponse = {
@@ -24,7 +25,7 @@ type RustSuccessResponse = {
 
 type RustResponse = RustErrorResponse | RustSuccessResponse;
 
-class GLMY extends HTMLElement {
+class GLMY extends AbstractComponent {
 
     /**
      * Default configuration

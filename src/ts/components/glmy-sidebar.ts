@@ -1,7 +1,8 @@
 
+import AbstractComponent from "../abstract/component";
 import GLMY from "./glmy-app";
 
-class GLMYSidebar extends HTMLElement {
+class GLMYSidebar extends AbstractComponent {
 
     /**
      * Application Root
@@ -69,7 +70,7 @@ class GLMYSidebar extends HTMLElement {
     /**
      * Render Component
      */
-    public render() {
+    public async render() {
 
     }
 
