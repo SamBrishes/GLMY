@@ -230,9 +230,27 @@ class GLMYNotes extends AbstractComponent {
      */
     public async closeTab(key: string) {
         if (this.notes.has(key)) {
-            this.notes.get(key)?.tab.remove();
-            this.notes.get(key)?.editor.remove();
+            let tab = this.notes.get(key) as NoteTab;
+
+            // Find another tab to select
+            let otherTab = null;
+            if (tab.tab.classList.contains('active')) {
+                if (tab.tab.previousElementSibling && tab.tab.previousElementSibling.matches('[data-tab]')) {
+                    otherTab = this.notes.get((tab.tab.previousElementSibling as any).dataset.tab);
+                } else if (tab.tab.nextElementSibling && tab.tab.nextElementSibling.matches('[data-tab]')) {
+                    otherTab = this.notes.get((tab.tab.nextElementSibling as any).dataset.tab);
+                }
+            }
+
+            // Remove Tab
+            tab.tab.remove();
+            tab.editor.remove();
             this.notes.delete(key);
+
+            // Select another Tab
+            if (otherTab) {
+                this.switchTab(otherTab.tab.dataset.tab as any);
+            }
         }
     }
 
@@ -306,7 +324,11 @@ class GLMYNotes extends AbstractComponent {
                 </svg>
             </button>
         `;
-        tabItem.addEventListener('click', () => {
+        tabItem.addEventListener('click', (event) => {
+            const target = event.target as HTMLElement;
+            if (target.matches('[name="action"][value="close"]') || target.closest(('[name="action"][value="close"]'))) {
+                return;
+            }
             this.switchTab(key);
         });
         return tabItem;
