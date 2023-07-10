@@ -44,7 +44,7 @@ class GLMYNotes extends AbstractComponent {
     private notes: Map<string, NoteTab> = new Map;
 
     /**
-     * FileList visibility switch
+     * Component States
      */
     public states: States<GLMYNotesStates> = new States({
         activeTab: null,

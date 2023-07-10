@@ -19,6 +19,13 @@ import SimpleBar from 'simplebar';
 
 import AbstractFormControl from '../abstract/form-control';
 import create from '../support/create';
+import States from '../extensions/states';
+
+interface NightEditorStates {
+    lines: number;
+    words: number;
+    characters: number;
+}
 
 interface EditorOptions {
     title: string;
@@ -48,19 +55,13 @@ class NightEditor extends AbstractFormControl {
     private _content: string = '';
 
     /**
-     * Current Lines Counter
+     * Component States
      */
-    private lines: number = 0;
-
-    /**
-     * Current Words Counter
-     */
-    private words: number = 0;
-
-    /**
-     * Current Characters Counter
-     */
-    private characters: number = 0;
+    public states: States<NightEditorStates> = new States({
+        lines: 0,
+        words: 0,
+        characters: 0,
+    });
 
     /**
      * Create a new NightEditor component instance
@@ -86,27 +87,6 @@ class NightEditor extends AbstractFormControl {
             .use(PluginIndent)
             .use(PluginUpload)
             .use(ctx => this.milkdownExtensions(ctx));
-    }
-
-    /**
-     * Current Lines Counter
-     */
-    get countLines(): number {
-        return this.lines;
-    }
-
-    /**
-     * Current Words Counter
-     */
-    get countWords(): number {
-        return this.words;
-    }
-
-    /**
-     * Current Words Counter
-     */
-    get countCharacters(): number {
-        return this.characters;
     }
 
     /**
@@ -210,33 +190,10 @@ class NightEditor extends AbstractFormControl {
                                 }
                             });
 
-                            // Old Values
-                            let counts = {
-                                lines: self.countLines,
-                                words: self.countWords,
-                                characters: self.countCharacters,
-                            };
-
-                            // New Values
-                            self.lines = doc.childCount;
-                            self.words = words;
-                            self.characters = Math.max(chars-1, 0);
-
-                            // Dispatch Event
-                            let event = new CustomEvent('counter', {
-                                bubbles: false,
-                                cancelable: false,
-                                composed: false,
-                                detail: {
-                                    old: counts,
-                                    new: {
-                                        lines: self.countLines,
-                                        words: self.countWords,
-                                        characters: self.countCharacters
-                                    }
-                                }
-                            })
-                            self.dispatchEvent(event);
+                            // Set Values
+                            self.states.set('lines', doc.childCount);
+                            self.states.set('words', words);
+                            self.states.set('characters', Math.max(chars-1, 0));
                         };
 
                         update(view)
@@ -259,6 +216,33 @@ class NightEditor extends AbstractFormControl {
      * Disconnected Callback
      */
     public async disconnectedCallback() {
+    }
+
+    /**
+     * Callback for changed states
+     * @param key 
+     * @param newValue 
+     * @param oldValue 
+     */
+    public async onStateChanged(key: keyof NightEditorStates, newValue: any, oldValue: any) {
+        if (key === 'lines') {
+            let lineCounter = this.querySelector('[data-line-counter]') as HTMLElement|null;
+            if (lineCounter) {
+                lineCounter.innerText = newValue.toString();
+            }
+        }
+        if (key === 'words') {
+            let wordCounter = this.querySelector('[data-word-counter]') as HTMLElement|null;
+            if (wordCounter) {
+                wordCounter.innerText = newValue.toString();
+            }
+        }
+        if (key === 'characters') {
+            let characterCounter = this.querySelector('[data-character-counter]') as HTMLElement|null;
+            if (characterCounter) {
+                characterCounter.innerText = newValue.toString();
+            }
+        }
     }
 
     /**
