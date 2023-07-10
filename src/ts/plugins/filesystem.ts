@@ -221,6 +221,24 @@ class FileSystem {
     }
 
     /**
+     * Delete a new file or directory.
+     * @param path 
+     * @param type 
+     * @returns 
+     */
+    public async delete(path: string, type: 'file' | 'directory'): Promise<boolean> {
+        if (type === 'file') {
+            return await this.operate(fs.removeFile, [this.join(path), {
+                dir: this.baseDir
+            }]);
+        } else {
+            return await this.operate(fs.removeDir, [this.join(path), {
+                dir: this.baseDir
+            }]);
+        }
+    }
+
+    /**
      * Delete File
      * @param path 
      * @returns 

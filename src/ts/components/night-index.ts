@@ -9,6 +9,7 @@ import NightTooltip from "./night-tooltip";
 import AbstractComponent from "../abstract/component";
 import create from "../support/create";
 import FileSystem from "../plugins/filesystem";
+import NightModal from "./night-modal";
 
 type NewFileEntry = FileEntry & {
     type: 'file' | 'folder',
@@ -219,7 +220,33 @@ class NightIndex extends AbstractComponent {
      * @returns 
      */
     public async onDelete(contextMenu: NightContext, item: HTMLElement, target: HTMLElement) {
+        await contextMenu.hide();
 
+        // Get Entry
+        const entry = target.closest("[data-path]") as HTMLElement|null;
+        if (!entry) {
+            return;
+        }
+        const entryName = entry.dataset.path as string;
+
+        // Open Modal
+        let status = await NightModal.confirm(
+            'Remove entry?',
+            `Do you really want to remove "${entry.dataset.path}"? This operation cannot be made undone!`,
+            {
+                ok: 'Delete File',
+                okColor: 'btn-danger'
+            }
+        );
+
+        if (status) {
+            let result = await this.fileSystem.delete(entryName, entry.dataset.type as 'file' | 'directory');
+            if (result) {
+                let li = this.fileList.get(entryName) as HTMLLIElement;
+                this.fileList.delete(entryName);
+                li.remove();
+            }
+        }
     }
 
     /**
@@ -296,7 +323,7 @@ class NightIndex extends AbstractComponent {
                 this.fileSystem.join(path, entryName), type
             );
             if (!status) {
-                console.log(this.fileSystem.getLastErrorMessage())
+                //@todo alert
             } else {
                 await this.render();
             }

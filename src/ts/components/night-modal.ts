@@ -47,20 +47,20 @@ class NightModal extends AbstractComponent {
                 footer: () => {
                     let cancel = document.createElement('button');
                     cancel.type = 'button';
-                    cancel.className = `btn btn-modal btn-${options.cancelColor || 'danger-secondary'}`;
+                    cancel.className = `btn btn-modal ${options.cancelColor || 'btn-gray outlined'}`;
                     cancel.innerText = options.cancel || 'Cancel';
                     cancel.addEventListener('click', async () => {
-                        await modal.hide();
                         resolve(false);
+                        await modal.hide();
                     });
 
                     let okay = document.createElement('button');
                     okay.type = 'button';
-                    okay.className = `btn btn-modal btn-${options.okColor || 'success'}`;
+                    okay.className = `btn btn-modal ${options.okColor || 'btn-success'}`;
                     okay.innerText = options.ok || 'Ok';
                     okay.addEventListener('click', async () => {
-                        await modal.hide();
                         resolve(true);
+                        await modal.hide();
                     });
     
                     let footer = document.createElement('footer');
