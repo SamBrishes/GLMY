@@ -112,7 +112,7 @@ class GLMYNotes extends AbstractComponent {
      */
     public async onStateChanged(key: keyof GLMYNotesStates, newValue: any, oldValue: any) {
         if (key === 'showFileList') {
-            this.classList[newValue ? 'add' : 'remove']('hide-sidebar');
+            this.classList[newValue ? 'remove' : 'add']('hide-sidebar');
             return;
         }
 
