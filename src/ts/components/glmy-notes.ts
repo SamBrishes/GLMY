@@ -13,6 +13,7 @@ interface GLMYNotesStates {
 };
 
 interface Note {
+    file: string;
     title: string;
     description: string;
     content: string;
@@ -147,6 +148,7 @@ class GLMYNotes extends AbstractComponent {
         let match = text.search(/^\-{3,3}(\s+)?(\r\n|\n|\r)/gm);
         if (match <= 0) {
             return {
+                file: filename,
                 title: filename,
                 description: '',
                 content: text
@@ -159,6 +161,7 @@ class GLMYNotes extends AbstractComponent {
             description: '',
             content: body
         } as Note;
+
         for (const line of head.split('\n') as string[]) {
             let pos = line.indexOf(':');
             if (pos < 0) {
@@ -168,6 +171,8 @@ class GLMYNotes extends AbstractComponent {
                 result[key] = val.trim();
             }
         }
+        
+        result.file = filename;
         return result;
     }
 
@@ -197,8 +202,10 @@ class GLMYNotes extends AbstractComponent {
         const note = await this.readNote(key);
         const tab = this.renderTab(key, note, setActive);
         const editor = new NightEditor({
+            file: note.file,
             title: note.title,
-            content: note.content
+            content: note.content,
+            fileSystem: this.fileSystem
         });
 
         this.notes.set(key, {

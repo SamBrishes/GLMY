@@ -1,9 +1,10 @@
 
 import type { Ctx } from '@milkdown/ctx';
 import type { EditorView } from '@milkdown/prose/view';
+import type FileSystem from '../plugins/filesystem';
 
 import { Editor, rootCtx, prosePluginsCtx } from '@milkdown/core';
-import { replaceAll } from '@milkdown/utils';
+import { replaceAll, getMarkdown } from '@milkdown/utils';
 import { Plugin, PluginKey } from '@milkdown/prose/state'
 import { commonmark as PluginCommonMark } from '@milkdown/preset-commonmark';
 import { gfm as PluginGFM } from '@milkdown/preset-gfm';
@@ -20,16 +21,21 @@ import SimpleBar from 'simplebar';
 import AbstractFormControl from '../abstract/form-control';
 import create from '../support/create';
 import States from '../extensions/states';
+import timeAgo from '../support/time-ago';
 
 interface NightEditorStates {
+    ready: boolean;
     lines: number;
     words: number;
     characters: number;
+    lastSave: number|null;
 }
 
 interface EditorOptions {
+    file: string;
     title: string;
     content: string;
+    fileSystem: FileSystem;
 };
 
 class NightEditor extends AbstractFormControl {
@@ -45,6 +51,11 @@ class NightEditor extends AbstractFormControl {
     private view: EditorView|null = null;
 
     /**
+     * Editor File
+     */
+    private _file: string = '';
+
+    /**
      * Title Value
      */
     private _title: string = '';
@@ -55,22 +66,37 @@ class NightEditor extends AbstractFormControl {
     private _content: string = '';
 
     /**
+     * FileSystem instance
+     */
+    private fileSystem: FileSystem;
+
+    /**
      * Component States
      */
     public states: States<NightEditorStates> = new States({
+        ready: false,
         lines: 0,
         words: 0,
         characters: 0,
+        lastSave: null
     });
+    
+    /**
+     * Keydown Event Handler
+     */
+    private onKeyDownHandler: (this: NightEditor, event: Event) => Promise<void>|void;
 
     /**
      * Create a new NightEditor component instance
      */
     constructor(options: EditorOptions) {
         super();
+        this._file = options.file;
         this._title = options.title;
         this._content = options.content;
+        this.fileSystem = options.fileSystem;
 
+        // Create Editor
         this.editor = Editor
             .make()
             .config(ThemeNord)
@@ -87,6 +113,9 @@ class NightEditor extends AbstractFormControl {
             .use(PluginIndent)
             .use(PluginUpload)
             .use(ctx => this.milkdownExtensions(ctx));
+        
+        // Attach Listener
+        this.onKeyDownHandler = this.onKeyDown.bind(this);
     }
 
     /**
@@ -189,6 +218,10 @@ class NightEditor extends AbstractFormControl {
                                     chars += node.textBetween(0, node.nodeSize).length;
                                 }
                             });
+                            if (self.states.get('ready')) {
+                                self._content = self.editor.action(getMarkdown());
+                                self.setFormData();
+                            }
 
                             // Set Values
                             self.states.set('lines', doc.childCount);
@@ -209,13 +242,17 @@ class NightEditor extends AbstractFormControl {
      * Connected Callback
      */
     public async connectedCallback() {
-        this.render();
+        this.addEventListener('keydown', this.onKeyDownHandler);
+        await this.render();
+        this.states.set('ready', true);
     }
 
     /**
      * Disconnected Callback
      */
     public async disconnectedCallback() {
+        this.removeEventListener('keydown', this.onKeyDownHandler)
+        this.states.set('ready', false);
     }
 
     /**
@@ -242,6 +279,39 @@ class NightEditor extends AbstractFormControl {
             if (characterCounter) {
                 characterCounter.innerText = newValue.toString();
             }
+        }
+        if (key === 'lastSave') {
+            let savePlaceholder = this.querySelector('[data-autosave-time]') as HTMLElement|null;
+            if (savePlaceholder) {
+                savePlaceholder.innerText = `${timeAgo(newValue)} ago`;
+            }
+        }
+    }
+
+    /**
+     * OnKeyDown Event Listener
+     * @param event 
+     */
+    public async onKeyDown(event: Event) {
+        if (!(event as KeyboardEvent).ctrlKey) {
+            return;
+        }
+
+        if ((event as KeyboardEvent).key === 's') {
+            await this.save();
+        }
+    }
+
+    /**
+     * Save File
+     */
+    public async save() {
+        let status = await this.fileSystem.writeFile(this._file, this.value, true);
+
+        if (status) {
+            this.states.set('lastSave', Date.now());
+        } else {
+
         }
     }
 
@@ -327,7 +397,7 @@ class NightEditor extends AbstractFormControl {
                 </div>
         
                 <div class="stats">
-                    <div class="stats-autosave">Last saved <span data-autosave-time>20 seconds ago</span></div>
+                    <div class="stats-autosave">Last saved <span data-autosave-time></span></div>
                 </div>
             `
         });

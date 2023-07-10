@@ -364,7 +364,6 @@ class NightIndex extends AbstractComponent {
     public async listContents() {
         let response = await this.fileSystem.readDir('/');
         if (!response) {
-            console.log(this.fileSystem.getLastErrorMessage())
             return [];
         }
 
