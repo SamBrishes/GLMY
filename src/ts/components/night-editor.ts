@@ -270,24 +270,14 @@ class NightEditor extends AbstractFormControl {
         // Initialize SimpleBar
         const editorForm = this.querySelector('form') as HTMLFormElement;
         const editorContent = this.querySelector('.night-editor-content') as HTMLDivElement;
-        editorContent.style.maxHeight = `${editorForm.offsetHeight - 48}px`;
+        editorContent.style.height = `${editorForm.offsetHeight - 48}px`;
         new SimpleBar(editorContent as HTMLDivElement);
         
         // Initialize Editor
         await this.editor.create()
 
         // Handle clicks to focus Editor
-        this.addEventListener('click', (ev) => {
-            let target = ev.target as HTMLElement;
-            let milkdown = this.querySelector('.milkdown') as HTMLElement;
-            if (target === milkdown || milkdown.contains(target)) {
-                return;
-            }
-
-            if (!this.contains(target)) {
-                return;
-            }
-
+        editorContent.addEventListener('click', (ev) => {
             this.view?.focus();
         });
 
