@@ -249,6 +249,9 @@ class NightEditor extends AbstractFormControl {
      * Render Component
      */
     public async render() {
+        if (this.children.length !== 0) {
+            return;
+        }
         this.append(this.renderForm(), this.renderFooter());
 
         // Initialize SimpleBar

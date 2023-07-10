@@ -1,5 +1,5 @@
 
-//import { invoke } from "@tauri-apps/api/tauri";
+import 'element-internals-polyfill';
 import { appWindow } from '@tauri-apps/api/window'
 
 import './components/glmy-app';

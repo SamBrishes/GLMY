@@ -125,12 +125,11 @@ class GLMYNotes extends AbstractComponent {
             if (this.notes.has(newValue)) {
                 let tab = this.notes.get(newValue) as NoteTab;
                 tab.tab.classList.add('active');
-    
+                
                 if (this.querySelector('night-editor')) {
-                    this.querySelector('night-editor')?.replaceWith(tab.editor);
-                } else {
-                    this.querySelector('main')?.append(tab.editor);
+                    this.querySelector('night-editor')?.remove()
                 }
+                this.querySelector('main')?.append(tab.editor);
             }
         }
     }
@@ -228,30 +227,32 @@ class GLMYNotes extends AbstractComponent {
      * Close Tab
      * @param key 
      */
-    public async closeTab(key: string) {
-        if (this.notes.has(key)) {
-            let tab = this.notes.get(key) as NoteTab;
+    public async closeTab(key: string): Promise<boolean> {
+        if (!this.notes.has(key)) {
+            return false;
+        }
+        let tab = this.notes.get(key) as NoteTab;
 
-            // Find another tab to select
-            let otherTab = null;
-            if (tab.tab.classList.contains('active')) {
-                if (tab.tab.previousElementSibling && tab.tab.previousElementSibling.matches('[data-tab]')) {
-                    otherTab = this.notes.get((tab.tab.previousElementSibling as any).dataset.tab);
-                } else if (tab.tab.nextElementSibling && tab.tab.nextElementSibling.matches('[data-tab]')) {
-                    otherTab = this.notes.get((tab.tab.nextElementSibling as any).dataset.tab);
-                }
-            }
-
-            // Remove Tab
-            tab.tab.remove();
-            tab.editor.remove();
-            this.notes.delete(key);
-
-            // Select another Tab
-            if (otherTab) {
-                this.switchTab(otherTab.tab.dataset.tab as any);
+        // Find another tab to select
+        let otherTab = null;
+        if (tab.tab.classList.contains('active')) {
+            if (tab.tab.previousElementSibling && tab.tab.previousElementSibling.matches('[data-tab]')) {
+                otherTab = this.notes.get((tab.tab.previousElementSibling as any).dataset.tab);
+            } else if (tab.tab.nextElementSibling && tab.tab.nextElementSibling.matches('[data-tab]')) {
+                otherTab = this.notes.get((tab.tab.nextElementSibling as any).dataset.tab);
             }
         }
+
+        // Remove Tab
+        tab.tab.remove();
+        tab.editor.remove();
+        this.notes.delete(key);
+
+        // Select another Tab
+        if (otherTab) {
+            await this.switchTab(otherTab.tab.dataset.tab as any);
+        }
+        return true;
     }
 
     /**
@@ -284,7 +285,7 @@ class GLMYNotes extends AbstractComponent {
                 return;
             }
             if ((target as HTMLButtonElement).value === 'close') {
-                this.closeTab(tab.dataset.tab as string);
+                await this.closeTab(tab.dataset.tab as string);
             }
         }
     }
@@ -324,12 +325,12 @@ class GLMYNotes extends AbstractComponent {
                 </svg>
             </button>
         `;
-        tabItem.addEventListener('click', (event) => {
+        tabItem.addEventListener('click', async (event) => {
             const target = event.target as HTMLElement;
             if (target.matches('[name="action"][value="close"]') || target.closest(('[name="action"][value="close"]'))) {
                 return;
             }
-            this.switchTab(key);
+            await this.switchTab(key);
         });
         return tabItem;
     }
