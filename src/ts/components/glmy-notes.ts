@@ -68,7 +68,6 @@ class GLMYNotes extends AbstractComponent {
         // Open session tabs
         for await (const key of this.root.config.session.notes.openTabs) {
             await this.openTab(key);
-            console.log(key)
         }
 
         // Open File
@@ -307,6 +306,9 @@ class GLMYNotes extends AbstractComponent {
                 </svg>
             </button>
         `;
+        tabItem.addEventListener('click', () => {
+            this.switchTab(key);
+        });
         return tabItem;
     }
 
