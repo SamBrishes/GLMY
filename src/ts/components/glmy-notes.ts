@@ -1,14 +1,16 @@
 
-import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, exists, readTextFile } from '@tauri-apps/api/fs';
 
 import AbstractComponent from '../abstract/component';
 import States from '../extensions/states';
 import GLMY from './glmy-app';
 import NightEditor from './night-editor';
 import NightIndex from './night-index';
+import wait from '../support/wait';
 
 interface GLMYNotesStates {
-    showFileList: boolean
+    activeTab: string|null;
+    showFileList: boolean;
 };
 
 interface Note {
@@ -21,7 +23,7 @@ interface Note {
 interface NoteTab {
     note: Note;
     tab: HTMLLIElement;
-    editor: NightEditor|null;
+    editor: NightEditor;
 };
 
 class GLMYNotes extends AbstractComponent {
@@ -37,11 +39,6 @@ class GLMYNotes extends AbstractComponent {
     private index: NightIndex|null = null;
 
     /**
-     * Active Editor Tab
-     */
-    private activeTab: string|null = null;
-
-    /**
      * Available Editor NoteTabs
      */
     private notes: Map<string, NoteTab> = new Map;
@@ -50,7 +47,8 @@ class GLMYNotes extends AbstractComponent {
      * FileList visibility switch
      */
     public states: States<GLMYNotesStates> = new States({
-        showFileList: true
+        activeTab: null,
+        showFileList: true,
     });
 
     /**
@@ -58,6 +56,84 @@ class GLMYNotes extends AbstractComponent {
      */
     constructor() {
         super();
+    }
+    
+    /**
+     * Connected Callback
+     */
+    public async connectedCallback() {
+        this.root = this.closest('glmy-app') as GLMY;
+        this.index = this.querySelector('night-index') as NightIndex;
+
+        // Open session tabs
+        for await (const key of this.root.config.session.notes.openTabs) {
+            await this.openTab(key);
+            console.log(key)
+        }
+
+        // Open File
+        this.index.addEventListener('open:file', (evt: CustomEventInit) => {
+            let path = evt.detail.path;
+            if (!path) {
+                return;
+            }
+
+            if (path.startsWith('/')) {
+                path = path.slice(1);
+            }
+
+            if (this.notes.has(path)) {
+                this.switchTab(path);
+            } else {
+                this.openTab(path, true);
+            }
+        });
+
+        // Add Live Click Listener
+        this.addEventListener('click', (evt) => {
+            this.onLiveClick(evt);
+        });
+
+        // Render
+        await this.render();
+    }
+
+    /**
+     * Disconnected Callback
+     */
+    public async disconnectedCallback() {
+        
+    }
+
+    /**
+     * Callback for changed states
+     * @param key 
+     * @param newValue 
+     * @param oldValue 
+     */
+    public async onStateChanged(key: keyof GLMYNotesStates, newValue: any, oldValue: any) {
+        if (key === 'showFileList') {
+            this.classList[newValue ? 'add' : 'remove']('hide-sidebar');
+            return;
+        }
+
+        if (key === 'activeTab') {
+            if (oldValue && this.notes.has(oldValue)) {
+                let oldTab = this.notes.get(oldValue) as NoteTab;
+                oldTab.tab.classList.remove('active');
+            }
+
+            if (this.notes.has(newValue)) {
+                let tab = this.notes.get(newValue) as NoteTab;
+                tab.tab.classList.add('active');
+    
+                if (this.querySelector('night-editor')) {
+                    this.querySelector('night-editor')?.replaceWith(tab.editor);
+                } else {
+                    this.querySelector('main')?.append(tab.editor);
+                }
+            }
+        }
     }
 
     /**
@@ -91,107 +167,73 @@ class GLMYNotes extends AbstractComponent {
         }
         return result;
     }
-    
+
     /**
-     * Connected Callback
+     * Read Note
+     * @param file 
+     * @returns 
      */
-    public async connectedCallback() {
-        this.root = this.closest('glmy-app') as GLMY;
-        this.index = this.querySelector('night-index') as NightIndex;
-
-        // Handle active Tab
-        this.activeTab = this.root.config.session.notes.activeTab;
-        for await (const key of this.root.config.session.notes.openTabs) {
-            const file = key.startsWith('./') ? key.slice(2) : key.trimLeft();
-            const text = await readTextFile(`GLMY/notes/${file}`, {
-                dir: BaseDirectory.Document
-            });
-            const note = this.parseTextToNote(file, text);
-
-            let isActive = this.activeTab === key;
-            let tab = this.buildTab(key, note.title, isActive);
-
-            this.notes.set(key, {
-                note,
-                tab,
-                editor: null
-            });
+    public async readNote(file: string): Promise<Note> {
+        const path = `GLMY/notes/${file}`;
+        if (!(await exists(path, { dir: BaseDirectory.Document }))) {
+            throw new Error('The passed note does not exist.');
         }
 
-        // Open File
-        this.index.addEventListener('open:file', (evt: CustomEventInit) => {
-            const path = evt.detail.path;
-            if (!path) {
-                return;
-            }
-            this.openTab(path);
-        });
-
-        // Add Live Click Listener
-        this.addEventListener('click', (evt) => {
-            this.onLiveClick(evt);
-        });
-
-        // Render
-        await this.render();
-    }
-
-    /**
-     * Disconnected Callback
-     */
-    public async disconnectedCallback() {
-        
-    }
-
-    /**
-     * Callback for changed states
-     * @param key 
-     * @param newValue 
-     * @param oldValue 
-     */
-    public async onStateChanged(key: keyof GLMYNotesStates, newValue: any, oldValue: any) {
-        if (key === 'showFileList') {
-            this.classList[newValue ? 'add' : 'remove']('hide-sidebar');
-        }
-    }
-
-    /**
-     * Open a new Tab
-     * @param string
-     */
-    public async openTab(path: string) {
-        const file = path.startsWith('./') ? path.slice(2) : path;
-        const text = await readTextFile(`GLMY/notes/${file}`, {
+        const text = await readTextFile(path, {
             dir: BaseDirectory.Document
         });
-        const note = this.parseTextToNote(file, text);
+        return this.parseTextToNote(file, text);
+    }
 
-        let tab = this.buildTab(path, note.title, true);
-        this.activeTab = path;
+    /**
+     * Open Tab
+     * @param key 
+     */
+    public async openTab(key: string, setActive: boolean = false) {
+        const note = await this.readNote(key);
+        const tab = this.renderTab(key, note, setActive);
+        const editor = new NightEditor({
+            title: note.title,
+            content: note.content
+        });
 
-        this.notes.set(path, {
+        this.notes.set(key, {
             note,
             tab,
-            editor: null
+            editor
         });
-        
+        if (setActive) {
+            this.states.set('activeTab', key);
+        }
+
         let tabs = this.querySelector('.tabs') as HTMLUListElement;
-        if (tabs.lastElementChild !== null) {
-            tabs.lastElementChild.before(tab);
+        if (tabs.children.length > 0) {
+            tabs.lastElementChild?.before(tab);
         } else {
             tabs.append(tab);
         }
     }
 
     /**
-     * Close an existing tab
+     * Switch Tab
+     * @param key 
+     */
+    public async switchTab(key: string) {
+        if (!this.notes.has(key)) {
+            throw new Error('The passed tab does not exist.');
+        }
+        this.states.set('activeTab', key);
+    }
+
+    /**
+     * Close Tab
      * @param key 
      */
     public async closeTab(key: string) {
-        let noteTab = this.notes.get(key);
-        if (noteTab) {
-            noteTab.tab.remove();
-            noteTab.editor?.remove();
+        if (this.notes.has(key)) {
+            this.notes.get(key)?.tab.remove();
+            this.notes.get(key)?.editor.remove();
+            this.notes.delete(key);
         }
     }
 
@@ -231,11 +273,23 @@ class GLMYNotes extends AbstractComponent {
     }
 
     /**
+     * Render Component
+     */
+    public async render() {
+        if (this.root) {
+            await wait(20);
+            this.states.set('activeTab', this.root.config.session.notes.activeTab);
+        }
+    }
+
+    /**
      * Build a new Tab Element
      * @param key 
-     * @param active 
+     * @param note
+     * @param active
+     * @returns
      */
-    private buildTab(key: string, title: string, active: boolean) {
+    private renderTab(key: string, note: Note, active: boolean): HTMLLIElement {
         const tabItem = document.createElement('li');
         tabItem.className = `tab-item${active ? ' active' : ''}`;
         tabItem.dataset.tab = key;
@@ -245,7 +299,7 @@ class GLMYNotes extends AbstractComponent {
                 <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
             </svg>
 
-            <span class="item-title">${title}</span>
+            <span class="item-title">${note.title}</span>
 
             <button type="button" class="ml-3 -mr-1 toolbar-btn" name="action" value="close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
@@ -254,25 +308,6 @@ class GLMYNotes extends AbstractComponent {
             </button>
         `;
         return tabItem;
-    }
-
-    /**
-     * Render Component
-     */
-    public async render() {
-        let tabs = this.querySelector('.tabs') as HTMLUListElement;
-        if (tabs.lastElementChild !== null) {
-            tabs.lastElementChild.before(...[...this.notes.values()].map(note => note.tab));
-        } else {
-            tabs.append(...[...this.notes.values()].map(note => note.tab));
-        }
-
-        // Set note content
-        if (this.activeTab && this.notes.has(this.activeTab)) {
-            let note = this.notes.get(this.activeTab) as NoteTab;
-            (this.querySelector('[data-note-title]') as HTMLInputElement).value = note.note.title;
-            (this.querySelector('night-editor') as NightEditor).value = note.note.content;
-        }
     }
 
 }

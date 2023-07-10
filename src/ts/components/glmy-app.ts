@@ -35,9 +35,9 @@ class GLMY extends AbstractComponent {
         session: {
             activePage: "notes",
             notes: {
-                activeTab: "./start.md",
+                activeTab: "start.md",
                 openTabs: [
-                    "./start.md"
+                    "start.md"
                 ]
             }
         },

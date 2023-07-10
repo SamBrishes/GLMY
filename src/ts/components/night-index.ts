@@ -189,6 +189,7 @@ class NightIndex extends AbstractComponent {
         };
 
         const cancelCallback = async () => {
+            input.blur();
             placeholder.remove();
         };
 

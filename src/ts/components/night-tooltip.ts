@@ -44,10 +44,6 @@ class NightTooltip extends AbstractComponent {
      */
     public async connectedCallback() {
         this.render();
-
-        if (typeof this.options.duration === 'number' && this.options.duration > 0) {
-            setTimeout(() => this.hide(), this.options.duration);
-        }
     }
 
     /**
@@ -77,6 +73,10 @@ class NightTooltip extends AbstractComponent {
         this.style.top = `${data.y}px`;
         this.style.left = `${data.x}px`;
         await wait(300);
+        
+        if (typeof this.options.duration === 'number' && this.options.duration > 0) {
+            setTimeout(() => this.hide(), this.options.duration);
+        }
     }
 
     /**

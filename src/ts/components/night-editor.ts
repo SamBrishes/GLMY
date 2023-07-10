@@ -18,7 +18,12 @@ import { nord as ThemeNord } from '@milkdown/theme-nord';
 import SimpleBar from 'simplebar';
 
 import AbstractFormControl from '../abstract/form-control';
+import create from '../support/create';
 
+interface EditorOptions {
+    title: string;
+    content: string;
+};
 
 class NightEditor extends AbstractFormControl {
 
@@ -33,7 +38,12 @@ class NightEditor extends AbstractFormControl {
     private view: EditorView|null = null;
 
     /**
-     * Current Value
+     * Title Value
+     */
+    private _title: string = '';
+
+    /**
+     * Editor Value
      */
     private _content: string = '';
 
@@ -55,14 +65,16 @@ class NightEditor extends AbstractFormControl {
     /**
      * Create a new NightEditor component instance
      */
-    constructor() {
+    constructor(options: EditorOptions) {
         super();
+        this._title = options.title;
+        this._content = options.content;
 
         this.editor = Editor
             .make()
             .config(ThemeNord)
             .config(ctx => {
-                ctx.set(rootCtx, this)
+                ctx.set(rootCtx, this.querySelector('.form-editor'))
             })
             .use(PluginCommonMark)
             .use(PluginGFM)
@@ -98,6 +110,21 @@ class NightEditor extends AbstractFormControl {
     }
 
     /**
+     * Get current title
+     */
+    get title() {
+        return this._title;
+    }
+
+    /**
+     * Set new title
+     */
+    set title(value: string) {
+        this._title = value;
+        this.setFormData();
+    }
+
+    /**
      * Get current value
      */
     get value() {
@@ -109,8 +136,18 @@ class NightEditor extends AbstractFormControl {
      */
     set value(value: string) {
         this._content = value;
-        this._internals.setFormValue(this._content);
         this.editor.action(replaceAll(this._content));
+        this.setFormData();
+    }
+
+    /**
+     * Set Form Data
+     */
+    public setFormData() {
+        let formData = new FormData();
+        formData.set('title', this._title);
+        formData.set('content', this._content);
+        this._internals.setFormValue(formData);
     }
 
     /**
@@ -228,11 +265,18 @@ class NightEditor extends AbstractFormControl {
      * Render Component
      */
     public async render() {
-        this.style.maxHeight = `${this.offsetHeight - 100}px`;
-        
-        await this.editor.create()
-        new SimpleBar(this);
+        this.append(this.renderForm(), this.renderFooter());
 
+        // Initialize SimpleBar
+        const editorForm = this.querySelector('form') as HTMLFormElement;
+        const editorContent = this.querySelector('.night-editor-content') as HTMLDivElement;
+        editorContent.style.maxHeight = `${editorForm.offsetHeight - 48}px`;
+        new SimpleBar(editorContent as HTMLDivElement);
+        
+        // Initialize Editor
+        await this.editor.create()
+
+        // Handle clicks to focus Editor
         this.addEventListener('click', (ev) => {
             let target = ev.target as HTMLElement;
             let milkdown = this.querySelector('.milkdown') as HTMLElement;
@@ -246,6 +290,71 @@ class NightEditor extends AbstractFormControl {
 
             this.view?.focus();
         });
+
+        // Set Initial Value
+        this.editor.action(replaceAll(this._content));
+    }
+
+    /**
+     * Render main form element
+     * @returns 
+     */
+    public renderForm() {
+        const form = create<HTMLFormElement>('form', {
+            action: '/',
+            method: 'post',
+            className: 'night-editor-form'
+        });
+
+        // Create title
+        const title = create<HTMLDivElement>('div', {
+            className: 'night-editor-title',
+        });
+        const input = create<HTMLInputElement>('input', {
+            type: 'input',
+            name: 'title',
+            value: this._title,
+            className: 'form-field',
+            placeholder: 'Note Title',
+            dataset: {
+                noteTitle: 's'
+            }
+        });
+        title.append(input);
+        
+        // Create Editor
+        const editor = create<HTMLDivElement>('div', {
+            className: 'night-editor-content',
+            innerHTML: `
+                <div class="form-editor"></div>
+            `
+        });
+
+        // Append & Return
+        form.append(title, editor);
+        return form;
+    }
+
+    /**
+     * Render main Footer
+     * @returns
+     */
+    public renderFooter() {
+        const footer = create<HTMLDivElement>('footer', {
+            className: 'night-editor-form-stats',
+            innerHTML: `
+                <div class="stats">
+                    <div class="stats-lines">Lines: <span data-line-counter>0</span></div>
+                    <div class="stats-words">Words: <span data-word-counter>0</span></div>
+                    <div class="stats-characters">Characters: <span data-character-counter>0</span></div>
+                </div>
+        
+                <div class="stats">
+                    <div class="stats-autosave">Last saved <span data-autosave-time>20 seconds ago</span></div>
+                </div>
+            `
+        });
+        return footer;
     }
 
 }
