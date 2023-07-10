@@ -1,10 +1,14 @@
 
-import { BaseDirectory, FileEntry, createDir, readDir, renameFile, writeTextFile } from "@tauri-apps/api/fs";
+import type { FileEntry } from "@tauri-apps/api/fs";
+
 import Sortable from "sortablejs";
+
 import NightContext from "./night-context";
 import isValidFilename from "../support/valid-filename";
 import NightTooltip from "./night-tooltip";
 import AbstractComponent from "../abstract/component";
+import create from "../support/create";
+import FileSystem from "../plugins/filesystem";
 
 type NewFileEntry = FileEntry & {
     type: 'file' | 'folder',
@@ -24,12 +28,18 @@ class NightIndex extends AbstractComponent {
     private sortables: Map<HTMLUListElement, Sortable>;
 
     /**
+     * FileSystem instance
+     */
+    private fileSystem: FileSystem;
+
+    /**
      * Create a new NightIndex component instance
      */
     constructor() {
         super();
         this.fileList = new Map;
         this.sortables = new Map;
+        this.fileSystem = new FileSystem(this.path ? this.path : '/');
     }
 
     /**
@@ -45,8 +55,10 @@ class NightIndex extends AbstractComponent {
     set path(value: string|null) {
         if (value === null) {
             this.removeAttribute('path');
+            this.fileSystem.changeBasePath('/');
         } else {
             this.setAttribute('path', value);
+            this.fileSystem.changeBasePath(value);
         }
     }
 
@@ -103,6 +115,114 @@ class NightIndex extends AbstractComponent {
     }
 
     /**
+     * On Open File Action
+     * @param contextMenu 
+     * @param item 
+     * @param target 
+     * @returns 
+     */
+    public async onOpen(contextMenu: NightContext, item: HTMLElement, target: HTMLElement) {
+        let entryItem = target.closest('[data-path]') as HTMLElement|null;
+        if (!entryItem) {
+            return;
+        }
+
+        this.dispatch(`open:${entryItem.dataset.type}`, {
+            path: entryItem.dataset.path
+        });
+        await contextMenu.hide();
+    }
+
+    /**
+     * On Rename File Action
+     * @param contextMenu 
+     * @param item 
+     * @param target 
+     * @returns 
+     */
+    public async onRename(contextMenu: NightContext, item: HTMLElement, target: HTMLElement) {
+        await contextMenu.hide();
+
+        // Get Entry
+        const entry = target.closest("[data-path]") as HTMLElement|null;
+        if (!entry) {
+            return;
+        }
+
+        // Callbacks
+        const renameCallback = async () => {
+            let oldName = entry.dataset.path as string;
+            let newName = input.value.trim();
+
+            if (oldName !== newName) {
+                if (!isValidFilename(newName)) {
+                    (new NightTooltip(input, {
+                        text: 'The passed entry name is not a valid file or folder name.',
+                        duration: 2000
+                    })).show();
+                    input.focus();
+                    return;
+                }
+
+                if (this.fileList.has(`${this.path}/${newName}`)) {
+                    (new NightTooltip(input, {
+                        text: 'The passed entry name does already exist.',
+                        duration: 2000
+                    })).show();
+                    input.focus();
+                    return;
+                }
+            }
+
+            let status = await this.fileSystem.rename(oldName, newName);
+
+            let li = this.fileList.get(oldName) as HTMLLIElement;
+            this.fileList.delete(oldName);
+
+            field.innerText = newName;
+            li.dataset.path = newName;
+            this.fileList.set(newName, li);
+            await this.render();
+        };
+
+        const cancelCallback = async () => {
+            field.innerText = entry.dataset.path as string;
+        };
+
+        // Focus Placeholder
+        let field = entry.querySelector('.item-label') as HTMLElement;
+        let input = create<HTMLInputElement>('input', {
+            type: 'text',
+            name: `${entry.dataset.type}`,
+            value: entry.dataset.path as string
+        });
+        field.innerHTML = ``;
+        field.append(input);
+        input.focus();
+        
+        // Cancel on Escape, Rename on Enter
+        input.addEventListener('keydown', async (evt) => {
+            if (evt.key === 'Escape') {
+                await cancelCallback();
+            }
+            if (evt.key === 'Enter') {
+                await renameCallback();
+            }
+        });
+    }
+
+    /**
+     * On Delete File Action
+     * @param contextMenu 
+     * @param item 
+     * @param target 
+     * @returns 
+     */
+    public async onDelete(contextMenu: NightContext, item: HTMLElement, target: HTMLElement) {
+
+    }
+
+    /**
      * Toggle Context Menu
      * @param target
      */
@@ -114,23 +234,11 @@ class NightIndex extends AbstractComponent {
             items: [
                 {
                     label: 'Open',
-                    action: () => {
-                        let entryItem = target.closest('[data-path]') as HTMLElement|null;
-                        if (!entryItem) {
-                            return;
-                        }
-    
-                        this.dispatch(`open:${entryItem.dataset.type}`, {
-                            path: entryItem.dataset.path
-                        });
-                        contextMenu.hide();
-                    }
+                    action: async (contextMenu, item) => await this.onOpen.call(this, contextMenu, item, target)
                 },
                 {
                     label: 'Rename',
-                    action: () => {
-    
-                    }
+                    action: async (contextMenu, item) => await this.onRename.call(this, contextMenu, item, target)
                 },
                 {
                     label: 'Delete',
@@ -140,7 +248,7 @@ class NightIndex extends AbstractComponent {
                             <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
                         </svg>
                     `,
-                    action: null,
+                    action: async (contextMenu, item) => await this.onDelete.call(this, contextMenu, item, target),
                     danger: true
                 }
             ]
@@ -162,7 +270,7 @@ class NightIndex extends AbstractComponent {
      * @param path
      * @param type
      */
-    public addPlaceholder(path: string, type: 'file' | 'folder') {
+    public addPlaceholder(path: string, type: 'file' | 'directory') {
         const createCallback = async () => {
             let entryName = input.value.trim();
             if (!isValidFilename(entryName)) {
@@ -184,8 +292,14 @@ class NightIndex extends AbstractComponent {
             }
 
             placeholder.remove();
-            await this.create(entryName, path, type === 'file');
-            await this.render();
+            let status = await this.fileSystem.create(
+                this.fileSystem.join(path, entryName), type
+            );
+            if (!status) {
+
+            } else {
+                await this.render();
+            }
         };
 
         const cancelCallback = async () => {
@@ -221,11 +335,9 @@ class NightIndex extends AbstractComponent {
      * List directory contents
      */
     public async listContents() {
-        let response: FileEntry[] = await readDir(`GLMY/${this.path}`, {
-            dir: BaseDirectory.Document,
-            recursive: true
-        });
-        if (!Array.isArray(response)) {
+        let response = await this.fileSystem.readDir('/');
+        if (!response) {
+            console.log(this.fileSystem.getLastErrorMessage())
             return [];
         }
 
@@ -238,6 +350,9 @@ class NightIndex extends AbstractComponent {
 
                 let subPath = item.path.split(`GLMY/${this.path}`)[1];
                 subPath = subPath.replace(/\\/g, '/');
+                if (subPath.startsWith('/')) {
+                    subPath = subPath.slice(1);
+                }
 
                 return {
                     type: typeof item.children === 'undefined' ? 'file' : 'folder',
@@ -259,55 +374,6 @@ class NightIndex extends AbstractComponent {
         // Turn List & Return
         let result = turnList(response);
         return result;
-    }
-
-    /**
-     * Create a new file or folder
-     * @param name 
-     * @param path 
-     * @param isFile
-     * @returns
-     */
-    public async create(name: string, path: string = '/', isFile: boolean = false): Promise<boolean> {
-        let subpath = this.path + '/';
-        if (path !== '/' && path.length > 1) {
-            path = path.startsWith('/') ? path.slice(1) : path;
-            path = path.endsWith('/') ? path.slice(0, -1) : path;
-            subpath += path;
-        }
-
-        try {
-            if (isFile) {
-                await writeTextFile(`GLMY/${subpath}/${name}`, '', {
-                    dir: BaseDirectory.Document
-                });
-            } else {
-                await createDir(`GLMY/${subpath}/${name}`, {
-                    dir: BaseDirectory.Document
-                });
-            }
-            return true;
-        } catch(e) {
-            return false;
-        }
-    }
-
-    /**
-     * Create a new folder
-     * @param name 
-     * @param path 
-     */
-    public async createFolder(name: string, path: string = '/'): Promise<boolean> {
-        return await this.create(name, path, false);
-    }
-
-    /**
-     * Create a new file
-     * @param name 
-     * @param path 
-     */
-    public async createFile(name: string, path: string = '/'): Promise<boolean> {
-        return await this.create(name, path, true);
     }
 
     /**
@@ -407,14 +473,14 @@ class NightIndex extends AbstractComponent {
      * Render a new FileList placeholder
      * @param type
      */
-    public renderPlaceholder(type: 'file' | 'folder'): HTMLLIElement {
+    public renderPlaceholder(type: 'file' | 'directory'): HTMLLIElement {
         let item = document.createElement('li') as HTMLLIElement;
         item.className = `filelist-item type-${type}`;
 
         let link = document.createElement('a');
         link.innerHTML = `
             <span class="item-move">
-                ${type === 'folder'? `
+                ${type === 'directory'? `
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder" viewBox="0 0 16 16">
                         <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
                     </svg>

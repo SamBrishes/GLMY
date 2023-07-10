@@ -1,12 +1,11 @@
 
-import { BaseDirectory, exists, readTextFile } from '@tauri-apps/api/fs';
-
 import AbstractComponent from '../abstract/component';
 import States from '../extensions/states';
 import GLMY from './glmy-app';
 import NightEditor from './night-editor';
 import NightIndex from './night-index';
 import wait from '../support/wait';
+import FileSystem from '../plugins/filesystem';
 
 interface GLMYNotesStates {
     activeTab: string|null;
@@ -44,6 +43,11 @@ class GLMYNotes extends AbstractComponent {
     private notes: Map<string, NoteTab> = new Map;
 
     /**
+     * FileSystem instance
+     */
+    private fileSystem: FileSystem;
+
+    /**
      * Component States
      */
     public states: States<GLMYNotesStates> = new States({
@@ -56,6 +60,7 @@ class GLMYNotes extends AbstractComponent {
      */
     constructor() {
         super();
+        this.fileSystem = new FileSystem('notes');
     }
     
     /**
@@ -172,15 +177,16 @@ class GLMYNotes extends AbstractComponent {
      * @returns 
      */
     public async readNote(file: string): Promise<Note> {
-        const path = `GLMY/notes/${file}`;
-        if (!(await exists(path, { dir: BaseDirectory.Document }))) {
+        if (!(await this.fileSystem.exists(file))) {
             throw new Error('The passed note does not exist.');
         }
 
-        const text = await readTextFile(path, {
-            dir: BaseDirectory.Document
-        });
-        return this.parseTextToNote(file, text);
+        const text = await this.fileSystem.readFile(file);
+        if (text !== false) {
+            return this.parseTextToNote(file, text);
+        } else {
+            throw new Error('The passed note does not exist.');
+        }
     }
 
     /**
@@ -272,7 +278,7 @@ class GLMYNotes extends AbstractComponent {
 
         // Check for action
         if (target.matches('[name="create"]')) {
-            this.index?.addPlaceholder('/', target.getAttribute('value') as 'file'|'folder');
+            this.index?.addPlaceholder('/', target.getAttribute('value') as 'file'|'directory');
         }
 
         if (target.matches('[name="action"]')) {

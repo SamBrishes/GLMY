@@ -8,7 +8,7 @@ interface ContextItem {
     label: string;
     icon?: string | HTMLElement | SVGElement;
     danger?: boolean;
-    action: ((element: HTMLElement) => void) | null;
+    action: ((contextMenu: NightContext, element: HTMLElement) => void) | null;
 }
 
 interface ContextOptions {
@@ -131,7 +131,7 @@ class NightContext extends AbstractComponent {
             li.className = `menu-item${item.danger ? ' item-danger' : ''}`;
             li.addEventListener('click', () => {
                 if (item.action !== null) {
-                    item.action(li);
+                    item.action(this, li);
                 }
             });
             list.append(li);
