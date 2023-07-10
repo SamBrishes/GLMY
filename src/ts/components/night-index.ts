@@ -296,7 +296,7 @@ class NightIndex extends AbstractComponent {
                 this.fileSystem.join(path, entryName), type
             );
             if (!status) {
-
+                console.log(this.fileSystem.getLastErrorMessage())
             } else {
                 await this.render();
             }
@@ -327,7 +327,7 @@ class NightIndex extends AbstractComponent {
 
         // Create on Blur
         input.addEventListener('blur', async (evt) => {
-            await createCallback();
+            //await createCallback();
         });
     }
 

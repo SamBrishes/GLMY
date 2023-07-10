@@ -70,7 +70,8 @@ class FileSystem {
             .filter(segment => segment.length > 0);
         
         let path = this.basePath.length > 0 ? this.basePath + '/' : '';
-        return `${path}${segments.join('/')}`;
+        let entryPath = segments.join('/');
+        return entryPath.startsWith(path) ? entryPath : path + entryPath;
     }
 
     /**
