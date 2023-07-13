@@ -200,7 +200,7 @@ class NightModal extends AbstractComponent {
             footer = this.options.footer(this);
         } else if (this.options.footer instanceof HTMLElement) {
             footer = this.options.footer;
-        } else {
+        } else if (this.options.footer === 'undefined') {
             footer = this.renderFooter();
         }
 
@@ -248,7 +248,7 @@ class NightModal extends AbstractComponent {
      * Render Modal Footer
      */
     public renderFooter() {
-        let content = document.createElement('article');
+        let content = document.createElement('footer');
         content.className = 'dialog-footer';
         return content;
     }
